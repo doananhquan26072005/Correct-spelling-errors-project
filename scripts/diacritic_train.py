@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from utils import load_config
+from common.config import load_config
 from diacritic_restoration.dataset import DiacriticDataLoaderFactory
-from diacritic_restoration.networks import build_model
+from diacritic_restoration.models import build_model
 from diacritic_restoration.trainer import DiacriticTrainer
 from diacritic_restoration.processor import DiacriticRestorer
 

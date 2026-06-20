@@ -12,10 +12,10 @@ from tqdm import tqdm
 from datasets import load_dataset
 
 # Import các hàm xử lý dữ liệu ngoại vi của bạn
-from spell_correction.process_dataset import process_dataset, split_data
+from spell_correction.dataset import process_dataset, split_data
 
 # Import các module đã cấu trúc lại theo SimpleNamespace ở trên
-from utils import load_config  # Hàm load_config của bạn
+from common.config import load_config  # Hàm load_config của bạn
 from spell_correction.processor import TeencodeProcessor, CandidateGenerator, FeatureExtractor
 from spell_correction.evaluator import Evaluator
 from spell_correction.trainer import LightGBMRankerTrainer

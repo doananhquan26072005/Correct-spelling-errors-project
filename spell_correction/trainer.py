@@ -1,4 +1,4 @@
-# train_skipgram.py
+# spell_correction/trainer.py
 import os
 import json
 import re

@@ -21,7 +21,7 @@ from diacritic_restoration.utils import (
 )
 
 # Kiến trúc mô hình mạng nơ-ron Transformer (nằm trong networks.py)
-from diacritic_restoration.networks import ContextAwareAccentTagger
+from diacritic_restoration.models import ContextAwareAccentTagger
 
 class DiacriticDataProcessor:
     def __init__(self, cfg):

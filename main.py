@@ -1,5 +1,5 @@
 # test_config.py
-from utils import load_config
+from common.config import load_config
 from types import SimpleNamespace
 
 def test_system_config():

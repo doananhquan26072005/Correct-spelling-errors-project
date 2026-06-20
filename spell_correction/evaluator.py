@@ -1,6 +1,30 @@
+# spell_correction/evaluator.py
 import re
 import numpy as np
 from typing import List, Dict, Set, Tuple
+
+class HeuristicScorer:
+    """Chuyên trách việc tính toán điểm Heuristic tổng hợp dựa trên cấu hình trọng số."""
+    def __init__(self, cfg=None):
+        self.cfg = cfg
+
+    def compute_score(self, norm_ken: float, norm_edit: float, length_ratio: float, 
+                      norm_c1: float, norm_c2: float, norm_c3: float, norm_sim: float) -> float:
+        w = self.cfg.feature_weights if self.cfg else None
+        if w:
+            return (
+                (w.w_kenlm * norm_ken) +
+                (w.w_edit * norm_edit) +
+                (w.w_len * length_ratio) +
+                (w.w_bigram * norm_c2) +
+                (w.w_trigram * norm_c3) +
+                (w.w_unigram * norm_c1) +
+                (w.w_sim * norm_sim)
+            )
+        else:
+            # Fallback heuristic mặc định
+            return (0.30 * norm_ken) + (0.25 * norm_edit) + (0.10 * length_ratio) + (0.20 * norm_c2)
+
 
 class Evaluator:
     def __init__(self, model_lm, config=None):

@@ -1,0 +1,21 @@
+# Deep Learning
+torch>=2.2
+
+# Machine Learning
+lightgbm>=4.0
+
+# Data Processing
+numpy>=1.26
+pandas>=2.2
+
+# Dataset
+datasets>=2.20
+
+# Configuration
+PyYAML>=6.0
+
+# Utilities
+tqdm>=4.66
+
+# String similarity
+python-Levenshtein>=0.25
