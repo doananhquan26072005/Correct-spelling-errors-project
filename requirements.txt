@@ -19,3 +19,5 @@ tqdm>=4.66
 
 # String similarity
 python-Levenshtein>=0.25
+
+gdown

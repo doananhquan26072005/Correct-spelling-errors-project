@@ -6,6 +6,13 @@ import os
 import json
 import numpy as np
 
+# -*- coding: utf-8 -*-
+import os
+import re
+import json
+import numpy as np
+import gdown
+
 class ResourceLoader:
     def __init__(self, cfg):
         """
@@ -14,20 +21,29 @@ class ResourceLoader:
         """
         self.cfg = cfg
 
+    def _download_from_gdrive(self, file_id, output_path):
+        """Hàm hỗ trợ tải file lớn từ Google Drive bằng gdown."""
+        print(f"[!] Không tìm thấy file tại {output_path}. Đang tiến hành tải từ Google Drive...")
+        url = f'https://drive.google.com/uc?id={file_id}'
+        
+        # Tạo thư mục cha nếu chưa tồn tại
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
+        # Tải file
+        gdown.download(url, output_path, quiet=False)
+        print(f"[+] Tải thành công và lưu tại: {output_path}")
+
     def load_vocab_and_dicts(self):
         """Nạp từ điển vocab, stopwords và xử lý sửa lỗi cú pháp file telex."""
         print("[*] Lớp ResourceLoader: Đang nạp từ điển và telex...")
         
-        # 1. Nạp và xử lý từ điển Vocab
         with open(self.cfg.paths.vocab_file, 'r', encoding='utf-8') as f:
             vocab = list(dict.fromkeys(f.read().splitlines()))
         word_to_idx = {word: i for i, word in enumerate(vocab)}
 
-        # 2. Nạp Stopwords
         with open(self.cfg.paths.stopwords_file, 'r', encoding='utf-8') as f:
             stopwords = set(f.read().splitlines())
 
-        # 3. Nạp và làm sạch file Telex JSON rác (dấu phẩy thừa trước dấu ngoặc đóng)
         with open(self.cfg.paths.telex_file, "r", encoding="utf-8") as f:
             telex_raw = f.read()
             telex_raw = re.sub(r',\s*}', '\n}', telex_raw)
@@ -41,19 +57,30 @@ class ResourceLoader:
         }
 
     def load_embeddings(self):
-        """Nạp ma trận nhúng Skip-gram từ file nén .npz."""
-        print("[*] Lớp ResourceLoader: Đang nạp ma trận nhúng Skip-gram...")
-        # Xử lý đổi đuôi file từ .pth sang _matrix.npz tương tự mã nguồn cũ
+        """Kiểm tra, tải (nếu thiếu) và nạp ma trận nhúng Skip-gram từ file .npz."""
+        # Xác định đường dẫn file .npz thực tế
         npz_path = self.cfg.paths.skipgram_model_file.replace(".pth", "_matrix.npz")
         
+        # Kiểm tra xem file đã tồn tại cục bộ chưa
         if not os.path.exists(npz_path):
-            raise FileNotFoundError(f"Không tìm thấy file ma trận nhúng tại: {npz_path}")
+            # Lấy GDrive File ID từ config. Nếu không có trong config, bạn có thể truyền cứng ở đây
+            gdrive_id = getattr(self.cfg.paths, "skipgram_gdrive_id", None)
             
+            if not gdrive_id:
+                raise ValueError(
+                    f"Không tìm thấy file {npz_path} cục bộ VÀ không tìm thấy cấu hình "
+                    f"'skipgram_gdrive_id' trong file cấu hình YAML để tải về!"
+                )
+            
+            # Tiến hành tải file tự động
+            self._download_from_gdrive(gdrive_id, npz_path)
+            
+        print("[*] Lớp ResourceLoader: Đang nạp ma trận nhúng Skip-gram vào bộ nhớ...")
         matrix_data = np.load(npz_path, allow_pickle=True)
         return matrix_data['norm_embedding_matrix']
 
     def load_all(self):
-        """Hàm tổng hợp để nạp toàn bộ tài nguyên cùng một lúc."""
+        """Hàm tổng hợp để nạp toàn bộ tài nguyên."""
         resources = self.load_vocab_and_dicts()
         resources["norm_embedding_matrix"] = self.load_embeddings()
         return resources

@@ -63,6 +63,7 @@ paths:
   teen_code_file: "teen_code.txt"
   trigram_lm_file: "trigram.bin"
   skipgram_model_file: "model_skipgram.pth"
+  skipgram_gdrive_id: "1gxVmxa-6jf5wbDBoCyd_VauUuV5wo2Du"
   lightgbm_data_path: "dataset_spell_correction.npz"
 
 model:
