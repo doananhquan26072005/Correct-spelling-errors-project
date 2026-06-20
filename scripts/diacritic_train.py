@@ -3,12 +3,15 @@ import torch
 import torch.nn as nn
 
 from common.config import load_config
-from diacritic_restoration.dataset import DiacriticDataLoaderFactory
-from diacritic_restoration.models import build_model
-from diacritic_restoration.processor import DiacriticRestorer
-from diacritic_restoration.trainer import DiacriticTrainer
-from diacritic_restoration.vocab import build_allowed_token_mask
-from common.logger import get_logger 
+from common.logger import get_logger
+
+from diacritic_restoration import (
+    DiacriticDataLoaderFactory,
+    build_model,
+    DiacriticRestorer,
+    DiacriticTrainer,
+    build_allowed_token_mask
+)
 
 logger = get_logger("DiacriticMainPipeline")
 

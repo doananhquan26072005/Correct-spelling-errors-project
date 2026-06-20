@@ -1,72 +1,18 @@
-2026-06-21 02:14:14 - [DiacriticMainPipeline] - INFO - === BẮT ĐẦU PIPELINE KHÔI PHỤC DẤU TIẾNG VIỆT ===
-2026-06-21 02:14:14 - [DiacriticMainPipeline] - INFO - Loading system configurations from: configs/diacritic_config.yaml
-2026-06-21 02:14:14 - [DiacriticMainPipeline] - INFO - Target compute hardware device auto-detected: CPU
-2026-06-21 02:14:14 - [DiacriticMainPipeline] - INFO - === GIAI ĐOẠN 1: CHUẨN BỊ DỮ LIỆU & XÂY DỰNG TỪ ĐIỂN ===
-2026-06-21 02:14:14 - [diacritic_restoration.processor] - INFO - DiacriticDataProcessor initialized.
-2026-06-21 02:14:14 - [diacritic_restoration.dataset] - INFO - DiacriticDataLoaderFactory initialized successfully.
-2026-06-21 02:14:14 - [diacritic_restoration.dataset] - INFO - Loading raw CSV data from: data/raw/viet_khong_dau.csv
-2026-06-21 02:14:14 - [diacritic_restoration.processor] - INFO - Cleaning original text pairs. Raw rows: 17,548
-2026-06-21 02:14:16 - [diacritic_restoration.processor] - INFO - Cleaning complete. Retained: 17,488. Dropped invalid entries: 0
-2026-06-21 02:14:16 - [diacritic_restoration.processor] - INFO - Executing dataset splitting mechanics...
-2026-06-21 02:14:16 - [diacritic_restoration.processor] - INFO - Dataset target ratios -> Train: 0.8 | Valid: 0.1
-2026-06-21 02:14:16 - [diacritic_restoration.processor] - INFO - Sliding window chunk augmentation actively splitting sentences...
-2026-06-21 02:15:39 - [DiacriticMainPipeline] - INFO - === BẮT ĐẦU PIPELINE KHÔI PHỤC DẤU TIẾNG VIỆT ===
-2026-06-21 02:15:39 - [DiacriticMainPipeline] - INFO - Loading system configurations from: configs/diacritic_config.yaml
-2026-06-21 02:15:39 - [DiacriticMainPipeline] - INFO - Target compute hardware device auto-detected: CPU
-2026-06-21 02:15:39 - [DiacriticMainPipeline] - INFO - === GIAI ĐOẠN 1: CHUẨN BỊ DỮ LIỆU & XÂY DỰNG TỪ ĐIỂN ===
-2026-06-21 02:15:39 - [diacritic_restoration.processor] - INFO - DiacriticDataProcessor initialized.
-2026-06-21 02:15:39 - [diacritic_restoration.dataset] - INFO - DiacriticDataLoaderFactory initialized successfully.
-2026-06-21 02:15:39 - [diacritic_restoration.dataset] - INFO - Loading raw CSV data from: data/raw/viet_khong_dau.csv
-2026-06-21 02:15:39 - [diacritic_restoration.processor] - INFO - Cleaning original text pairs. Raw rows: 17,548
-2026-06-21 02:15:41 - [diacritic_restoration.processor] - INFO - Cleaning complete. Retained: 17,488. Dropped invalid entries: 0
-2026-06-21 02:15:41 - [diacritic_restoration.processor] - INFO - Executing dataset splitting mechanics...
-2026-06-21 02:15:41 - [diacritic_restoration.processor] - INFO - Dataset target ratios -> Train: 0.8 | Valid: 0.1
-2026-06-21 02:15:41 - [diacritic_restoration.processor] - INFO - Sliding window chunk augmentation actively splitting sentences...
-2026-06-21 02:16:36 - [diacritic_restoration.processor] - INFO - Generated unique sentence chunk dataframe size: 699,539
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO - Downsampling train dataset to max_train_samples: 300,000
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO - Final dataset split sizes for DataLoaders:
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO -   > Train original  : 13,990
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO -   > Train augmented : 300,000
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO -   > Valid original  : 1,748
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO -   > Test original   : 1,750
-2026-06-21 02:16:38 - [diacritic_restoration.dataset] - INFO - Building CharVocab and WordVocab...
-2026-06-21 02:16:38 - [diacritic_restoration.vocab] - INFO - Attempting to read custom words file from: data/external/words.txt
-2026-06-21 02:16:38 - [diacritic_restoration.vocab] - WARNING - Words file NOT found at 'data/external/words.txt'. Building vocabulary solely using Dataframe.
-2026-06-21 02:16:38 - [diacritic_restoration.vocab] - INFO - Extracting distinct characters from aggregated text components...
-2026-06-21 02:16:41 - [diacritic_restoration.vocab] - INFO - CharVocab successfully built. Total tokens: 150
-2026-06-21 02:16:41 - [diacritic_restoration.vocab] - INFO - Final initialized CharVocab size: 150
-2026-06-21 02:16:43 - [diacritic_restoration.vocab] - INFO - WordVocab successfully built. Total tokens: 12,856
-2026-06-21 02:16:43 - [diacritic_restoration.vocab] - INFO - Final initialized WordVocab size: 12,856
-2026-06-21 02:16:43 - [diacritic_restoration.dataset] - INFO - Vocab built | CharVocab size: 150 | WordVocab size: 12,856
-2026-06-21 02:16:43 - [diacritic_restoration.dataset] - INFO - Creating AccentContextDataset instances...
-2026-06-21 02:17:43 - [diacritic_restoration.dataset] - INFO - Dataset samples successfully loaded: 300,000
-2026-06-21 02:17:43 - [diacritic_restoration.dataset] - INFO - Dataset samples successfully loaded: 1,748
-2026-06-21 02:17:44 - [diacritic_restoration.dataset] - INFO - Dataset samples successfully loaded: 1,750
-2026-06-21 02:17:44 - [diacritic_restoration.dataset] - INFO - Constructing PyTorch DataLoaders...
-2026-06-21 02:17:44 - [diacritic_restoration.dataset] - INFO - Successfully built all loaders and vocabs in 124.31 seconds.
-2026-06-21 02:17:44 - [diacritic_restoration.vocab] - INFO - Generating allowed diacritic token token mask tensor...
-2026-06-21 02:17:44 - [diacritic_restoration.vocab] - INFO - Allowed token mask matrix built successfully in 0.0842s.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - === GIAI ĐOẠN 4: NẠP CHECKPOINT TỐI ƯU ĐỂ ĐÁNH GIÁ KIỂM THỬ ===
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - Initializing DiacriticRestorer using checkpoint target: models/accent_tagger_context.pt
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - Loading state dictionaries from: models/accent_tagger_context.pt
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - Restored CharVocab mapping size from checkpoint: 201
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - Restored WordVocab mapping size from checkpoint: 12,856
-2026-06-21 02:17:44 - [diacritic_restoration.models] - INFO - ContextAwareAccentTagger architecture initialized | Char Emb: 128 | Word Emb: 64 | Heads: 4 | Layers: 4
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - Model weights state dict loaded with strict match validation.
-2026-06-21 02:17:44 - [diacritic_restoration.vocab] - INFO - Generating allowed diacritic token token mask tensor...
-2026-06-21 02:17:44 - [diacritic_restoration.vocab] - INFO - Allowed token mask matrix built successfully in 0.0855s.
-2026-06-21 02:17:44 - [diacritic_restoration.processor] - INFO - DiacriticRestorer deployment pipeline successfully constructed.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - === DEMO SUY LUẬN THỰC TẾ (INFERENCE) ===
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - Sample #1 | Inference time: 75.42ms
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [IN]  : toi ten la
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [OUT] : tôi tên là
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - Sample #2 | Inference time: 19.65ms
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [IN]  : mot nguoi mat tich o ho chua nuoc nuoc trong.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [OUT] : một người mắt tích ở hộ chứa nước nước trọng.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - Sample #3 | Inference time: 19.05ms
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [IN]  : nhung hinh anh dac sac nhat ve vong chung ket world cup.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [OUT] : những hình ảnh đặc sắc nhất về vòng chứng kết world cúp.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - Sample #4 | Inference time: 19.73ms
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [IN]  : apple se ra mat ipad duoc thiet ke lai trong thang 4?.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO -   > [OUT] : apple sẽ ra mắt ipađ được thiết kế lại trong tháng 4?.
-2026-06-21 02:17:44 - [DiacriticMainPipeline] - INFO - === PIPELINE HOÀN THÀNH BIÊN DỊCH BƯỚC 1 TRONG 125.10s ===
+2026-06-21 02:41:11 - [diacritic_restoration.models] - INFO - ContextAwareAccentTagger architecture initialized | Char Emb: 128 | Word Emb: 64 | Heads: 4 | Layers: 4
+ration.vocab] - WARNING - Words file NOT found at 'data/external/words.txt'. Building vocabulary solely using Dataframe.
+2026-06-21 02:40:16 - [diacritic_restoration.vocab] - INFO - Extracting distinct characters from aggregated text components...
+2026-06-21 02:40:19 - [diacritic_restoration.vocab] - INFO - Ch2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === GIAI ĐOẠN 4: NẠP CHECKPOINT TỐI ƯU ĐỂ ĐÁNH GIÁ KIỂM THỬ ===
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === DEMO SUY LUẬN THỰC TẾ (INFERENCE) ===
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #1 | Inference time: 65.58ms
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : toi ten la
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : tôi tên là
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #2 | Inference time: 14.70ms
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : mot nguoi mat tich o ho chua nuoc nuoc trong.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : một người mắt tích ở hộ chứa nước nước trọng.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #3 | Inference time: 18.33ms
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : nhung hinh anh dac sac nhat ve vong chung ket world cup.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : những hình ảnh đặc sắc nhất về vòng chứng kết world cúp.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #4 | Inference time: 15.04ms
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : apple se ra mat ipad duoc thiet ke lai trong thang 4?.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : apple sẽ ra mắt ipađ được thiết kế lại trong tháng 4?.
+2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === PIPELINE HOÀN THÀNH BIÊN DỊCH BƯỚC 1 TRONG 108.16s ===
