@@ -1,12 +1,9 @@
+# diacritic_restoration/utils.py
 import unicodedata
 from typing import List
-
 import Levenshtein
 
 def remove_accents_char(ch: str) -> str:
-    """ 
-    Loại bỏ các dấu trong tiếng Việt cho một ký tự. 
-    """
     if ch == "đ":
         return "d"
     if ch == "Đ":
@@ -17,25 +14,20 @@ def remove_accents_char(ch: str) -> str:
 
 
 def remove_accents_text(text: str) -> str:
-    """ 
-    Loại bỏ các dấu trong tiếng Việt cho một chuỗi. 
-    """
     return "".join(remove_accents_char(ch) for ch in str(text))
 
 
 def normalize_text(text: str, lowercase: bool = True) -> str:
-    """ 
-    Chuẩn hóa văn bản bằng cách loại bỏ các dấu và khoảng trắng thừa, và chuyển về chữ thường nếu cần. 
-    """
-    text = unicodedata.normalize("NFC", str(text))
+    text = unicodedata.normalize("NFC", text)
     text = " ".join(text.strip().split())
     if lowercase:
         text = text.lower()
     return text
 
+
 def apply_constraint_to_logits(logits, src, allowed_mask):
     """
-    Chỉ cho phép mỗi vị trí dự đoán các phiên bản có dấu hợp lệ của ký tự src.
+    Force each position to predict only valid accented versions of src char.
     """
     position_allowed = allowed_mask[src]  # [B, L, V]
     return logits.masked_fill(~position_allowed, -1e9)
@@ -95,10 +87,12 @@ def compute_text_metrics(inputs: List[str], preds: List[str], targets: List[str]
         total_edit_distance += Levenshtein.distance(pred, target)
         total_target_chars += max(1, len(target))
 
-    return {
+    metrics = {
         "char_accuracy": correct_chars / max(1, total_chars),
         "word_accuracy": word_accuracy(preds, targets),
         "accent_only_accuracy": accent_only_accuracy(inputs, preds, targets),
         "exact_match": exact_match / max(1, len(targets)),
         "cer": total_edit_distance / max(1, total_target_chars),
     }
+    
+    return metrics

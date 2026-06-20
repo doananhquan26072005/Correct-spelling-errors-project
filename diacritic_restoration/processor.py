@@ -1,54 +1,64 @@
+from collections import Counter
 import json
+import time
 from types import SimpleNamespace
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
 import pandas as pd
 import torch
 
-# --- IMPORT NỘI BỘ PHÂN HỆ DIACRITIC_RESTORATION ---
-# Các class từ điển và hàm mã hóa (gộp trong dataset.py)
-from diacritic_restoration.vocab import (
-    CharVocab,
-    WordVocab,
-    build_allowed_token_mask,
-    encode_word_ids_per_char,
-)
-
-# Các hàm helper và đo đạc (gộp trong utils.py)
-from diacritic_restoration.utils import (
-    normalize_text, 
-    remove_accents_text, 
-    apply_constraint_to_logits
-)
-
-# Kiến trúc mô hình mạng nơ-ron Transformer (nằm trong networks.py)
 from diacritic_restoration.models import ContextAwareAccentTagger
+from diacritic_restoration.utils import apply_constraint_to_logits, normalize_text, remove_accents_text
+from diacritic_restoration.vocab import CharVocab, WordVocab, build_allowed_token_mask, encode_word_ids_per_char
+from common.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class DiacriticDataProcessor:
     def __init__(self, cfg):
         self.cfg = cfg
+        logger.info("DiacriticDataProcessor initialized.")
 
     def load_words_from_txt(self) -> List[str]:
         words = []
-        with open(self.cfg.data.words_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line: continue
-                try:
-                    item = json.loads(line)
-                    word = str(item.get("text", "")).strip()
-                    if word: words.append(word)
-                except json.JSONDecodeError: continue
+        logger.info(f"Loading external words vocabulary from text file: {self.cfg.data.words_path}")
+        try:
+            with open(self.cfg.data.words_path, "r", encoding="utf-8") as f:
+                for line_idx, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        item = json.loads(line)
+                        word = str(item.get("text", "")).strip()
+                        if word:
+                            words.append(word)
+                    except json.JSONDecodeError:
+                        logger.debug(f"JSONDecodeError at {self.cfg.data.words_path} line {line_idx}")
+                        continue
+            logger.info(f"Loaded {len(words):,} words from {self.cfg.data.words_path}")
+        except FileNotFoundError as e:
+            logger.error(f"Critical dictionary file not found: {self.cfg.data.words_path}", exc_info=True)
+            raise e
         return words
 
     def make_pair_from_target(self, target: str):
         tgt = normalize_text(target, lowercase=self.cfg.augmentation.lowercase)
-        if not tgt or len(tgt) > self.cfg.model.max_len: return None
+        if not tgt:
+            return None
+        if len(tgt) > self.cfg.model.max_len:
+            tgt = tgt[:self.cfg.model.max_len]
         src = remove_accents_text(tgt)
-        if len(src) != len(tgt): return None
+        if len(src) != len(tgt):
+            logger.debug(f"Length mismatch after accent removal. Target: '{tgt}' ({len(tgt)}), Source: '{src}' ({len(src)})")
+            return None
         return {self.cfg.data.input_col: src, self.cfg.data.target_col: tgt}
 
     def clean_original_pairs(self, df: pd.DataFrame) -> pd.DataFrame:
+        logger.info(f"Cleaning original text pairs. Raw rows: {len(df):,}")
         pairs = []
+        skipped_count = 0
+        
         for _, row in df.iterrows():
             src = normalize_text(row[self.cfg.data.input_col], lowercase=self.cfg.augmentation.lowercase)
             tgt = normalize_text(row[self.cfg.data.target_col], lowercase=self.cfg.augmentation.lowercase)
@@ -59,58 +69,83 @@ class DiacriticDataProcessor:
                 pairs.append({self.cfg.data.input_col: src, self.cfg.data.target_col: tgt})
             else:
                 pair = self.make_pair_from_target(tgt)
-                if pair is not None: pairs.append(pair)
-        return pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+                if pair is not None:
+                    pairs.append(pair)
+                else:
+                    skipped_count += 1
+                    
+        cleaned_df = pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+        logger.info(f"Cleaning complete. Retained: {len(cleaned_df):,}. Dropped invalid entries: {skipped_count:,}")
+        return cleaned_df
 
     def build_word_pairs_from_words_file(self) -> pd.DataFrame:
         if not self.cfg.augmentation.use_word_pairs:
+            logger.debug("Augmentation 'use_word_pairs' is disabled.")
             return pd.DataFrame(columns=[self.cfg.data.input_col, self.cfg.data.target_col])
+            
+        logger.info("Building word pairs data augmentation component...")
         words = self.load_words_from_txt()
         pairs = []
         for word in words:
             pair = self.make_pair_from_target(word)
-            if pair is None or len(pair[self.cfg.data.target_col]) < 2: continue
+            if pair is None or len(pair[self.cfg.data.target_col]) < 2:
+                continue
             pairs.append(pair)
-            if len(pairs) >= self.cfg.augmentation.max_word_pairs: break
-        return pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+            if len(pairs) >= self.cfg.augmentation.max_word_pairs:
+                logger.info(f"Reached max_word_pairs constraint ceiling: {self.cfg.augmentation.max_word_pairs:,}")
+                break
+                
+        word_pairs_df = pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+        logger.info(f"Generated unique word pairs dataframe sample size: {len(word_pairs_df):,}")
+        return word_pairs_df
 
     def build_sentence_chunks_from_targets(self, train_df: pd.DataFrame) -> pd.DataFrame:
         if not self.cfg.augmentation.use_sentence_chunks:
+            logger.debug("Augmentation 'use_sentence_chunks' is disabled.")
             return pd.DataFrame(columns=[self.cfg.data.input_col, self.cfg.data.target_col])
+            
+        logger.info("Sliding window chunk augmentation actively splitting sentences...")
         pairs = []
         for tgt in train_df[self.cfg.data.target_col].astype(str).tolist():
             tgt = normalize_text(tgt, lowercase=self.cfg.augmentation.lowercase)
             words = tgt.split()
-            if len(words) < self.cfg.augmentation.chunk_min_words: continue
+            if len(words) < self.cfg.augmentation.chunk_min_words:
+                continue
             max_w = min(self.cfg.augmentation.chunk_max_words, len(words))
             for window in range(self.cfg.augmentation.chunk_min_words, max_w + 1):
                 for start in range(0, len(words) - window + 1, self.cfg.augmentation.chunk_stride):
                     chunk = " ".join(words[start : start + window])
                     pair = self.make_pair_from_target(chunk)
-                    if pair is not None: pairs.append(pair)
-        return pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+                    if pair is not None:
+                        pairs.append(pair)
+                        
+        chunks_df = pd.DataFrame(pairs).drop_duplicates().reset_index(drop=True)
+        logger.info(f"Generated unique sentence chunk dataframe size: {len(chunks_df):,}")
+        return chunks_df
 
     def split_dataframe(self, df: pd.DataFrame):
+        logger.info("Executing dataset splitting mechanics...")
         df = df.sample(frac=1.0, random_state=self.cfg.training.seed).reset_index(drop=True)
         n_total = len(df)
         n_train = int(n_total * self.cfg.data.train_ratio)
         n_valid = int(n_total * self.cfg.data.valid_ratio)
+        
+        logger.info(f"Dataset target ratios -> Train: {self.cfg.data.train_ratio} | Valid: {self.cfg.data.valid_ratio}")
         return (
             df.iloc[:n_train].reset_index(drop=True),
             df.iloc[n_train:n_train + n_valid].reset_index(drop=True),
             df.iloc[n_train + n_valid:].reset_index(drop=True)
         )
-    
-class DiacriticRestorer:
-    """Class chịu trách nhiệm load mô hình khôi phục dấu và thực hiện inference 
-    (suy luận) cho chuỗi văn bản không dấu đầu vào."""
-    
+
+
+class DiacriticRestorer: 
     def __init__(self, checkpoint_path: str, cfg):
         self.cfg = cfg
+        logger.info(f"Initializing DiacriticRestorer using checkpoint target: {checkpoint_path}")
         self.model, self.char_vocab, self.word_vocab, self.allowed_mask = self._load_checkpoint(checkpoint_path)
+        logger.info("DiacriticRestorer deployment pipeline successfully constructed.")
 
     def _predict_batch(self, src_char: torch.Tensor, src_word: torch.Tensor) -> torch.Tensor:
-        """Hàm dự đoán nhãn tối ưu kết hợp mặt nạ ràng buộc (Allowed Mask)."""
         logits = self.model(src_char, src_word)
         logits = apply_constraint_to_logits(logits, src_char, self.allowed_mask)
         return logits.argmax(dim=-1)
@@ -118,7 +153,11 @@ class DiacriticRestorer:
     def process(self, text: str) -> str:
         """Phương thức Public: Nhận vào văn bản không dấu, trả về văn bản có dấu chuẩn."""
         self.model.eval()
+        start_time = time.time()
+        
+        raw_length = len(text)
         text = normalize_text(str(text), lowercase=self.cfg.augmentation.lowercase)
+        logger.debug(f"Inference input raw text length: {raw_length} -> Normalized length: {len(text)}")
 
         src_char_ids = self.char_vocab.encode(text, self.cfg.model.max_len)
         src_word_ids = encode_word_ids_per_char(
@@ -153,27 +192,37 @@ class DiacriticRestorer:
             output_chars.append(pred_ch)
 
         if len(text) > self.cfg.model.max_len:
+            logger.warning(
+                f"Input text exceeds model max_len ({self.cfg.model.max_len}). "
+                f"The remaining part ({len(text) - self.cfg.model.max_len} chars) will be appended without restoration."
+            )
             output_chars.append(text[self.cfg.model.max_len:])
 
-        return "".join(output_chars)
+        restored_text = "".join(output_chars)
+        elapsed_inference = time.time() - start_time
+        logger.debug(f"Single inference restoration completed in {elapsed_inference:.4f}s.")
+        
+        return restored_text
 
     def _load_checkpoint(self, checkpoint_path: str):
-        """Hàm nội bộ: Tự động phân tách weight wrapper và load mô hình an toàn."""
+        logger.info(f"Loading state dictionaries from: {checkpoint_path}")
         torch.serialization.add_safe_globals([SimpleNamespace])
-        checkpoint = torch.load(checkpoint_path, map_location=self.cfg.training.device)
-
-        # Cập nhật ngược lại các thông số config tĩnh từ checkpoint nếu có
-        if "config" in checkpoint:
-            # Lưu ý xử lý an toàn tùy thuộc vào cấu trúc Box hay Namespace
-            pass
+        
+        try:
+            checkpoint = torch.load(checkpoint_path, map_location=self.cfg.training.device)
+        except Exception as e:
+            logger.error(f"Failed to load checkpoint file at {checkpoint_path}.", exc_info=True)
+            raise e
 
         char_vocab = CharVocab()
         char_vocab.stoi = checkpoint["char_vocab_stoi"]
         char_vocab.itos = {int(k): v for k, v in checkpoint["char_vocab_itos"].items()}
+        logger.info(f"Restored CharVocab mapping size from checkpoint: {len(char_vocab):,}")
 
         word_vocab = WordVocab()
         word_vocab.stoi = checkpoint["word_vocab_stoi"]
         word_vocab.itos = {int(k): v for k, v in checkpoint["word_vocab_itos"].items()}
+        logger.info(f"Restored WordVocab mapping size from checkpoint: {len(word_vocab):,}")
 
         model = ContextAwareAccentTagger(
             char_vocab_size=len(char_vocab),
@@ -187,15 +236,22 @@ class DiacriticRestorer:
         state_dict = checkpoint["model_state_dict"]
         new_state_dict = {}
         for key, value in state_dict.items():
-            if key.startswith("module."): new_state_dict[key[7:]] = value
-            elif key.startswith("_orig_mod."): new_state_dict[key[10:]] = value
-            elif key.startswith("model."): new_state_dict[key[6:]] = value
-            else: new_state_dict[key] = value
+            if key.startswith("module."):
+                new_state_dict[key[7:]] = value
+            elif key.startswith("_orig_mod."):
+                new_state_dict[key[10:]] = value
+            elif key.startswith("model."):
+                new_state_dict[key[6:]] = value
+            else:
+                new_state_dict[key] = value
 
         try:
             model.load_state_dict(new_state_dict)
+            logger.info("Model weights state dict loaded with strict match validation.")
         except Exception:
+            logger.warning("Strict state dict match failed. Re-attempting loading parameters with strict=False flags...")
             model.load_state_dict(new_state_dict, strict=False)
+            logger.info("Model weights parameter load-out configured with non-strict relaxation completed.")
 
         model.eval()
         allowed_mask = build_allowed_token_mask(char_vocab, self.cfg)

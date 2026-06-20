@@ -1,59 +1,3 @@
-# # Data Paths & Columns
-# data:
-#   csv_path: "data/raw/viet_khong_dau.csv"
-#   words_path: "data/external/words.txt"
-#   input_col: "input"
-#   target_col: "target"
-#   train_ratio: 0.8
-#   valid_ratio: 0.1
-#   test_ratio: 0.1
-
-# # Vocabulary configuration
-# vocab:
-#   max_word_vocab_size: 50000
-#   min_word_freq: 1
-
-# # Data Generation / Augmentation
-# augmentation:
-#   lowercase: true
-#   use_word_pairs: false
-#   max_word_pairs: 30000
-#   use_sentence_chunks: true
-#   chunk_min_words: 5
-#   chunk_max_words: 24
-#   chunk_stride: 2
-#   max_train_samples: 300000
-
-# # Model Architecture
-# model:
-#   max_len: 256
-#   d_model: 192
-#   char_emb_dim: 128
-#   word_emb_dim: 64
-#   nhead: 4
-#   num_encoder_layers: 4
-#   dim_feedforward: 768
-#   dropout: 0.2
-
-# # Hyperparameters & Training Settings
-# training:
-#   batch_size: 64
-#   epochs: 80
-#   learning_rate: 1.0e-4   # Khuyến khích viết dạng khoa học này trong YAML
-#   weight_decay: 1.0e-4
-#   grad_clip: 1.0
-#   seed: 42
-#   checkpoint_path: "models/test_accent_tagger.pt"
-#   device: "auto"          # Xem lưu ý phía dưới về cách xử lý torch.cuda.is_available()
-
-# # Loss & Constraints
-# loss:
-#   copy_loss_weight: 1.0
-#   accent_loss_weight: 10.0
-#   use_constraint_in_training: true
-
-# configs/diacritic_config.yaml (Bản Test nhanh - Siêu nhẹ)
-
 # Data Paths & Columns
 data:
   csv_path: "data/raw/viet_khong_dau.csv"
@@ -66,44 +10,44 @@ data:
 
 # Vocabulary configuration
 vocab:
-  max_word_vocab_size: 1000      # Hạ thấp để từ điển nhẹ, embedding matrix nhỏ
-  min_word_freq: 5              # Chỉ lấy từ xuất hiện nhiều để thu hẹp từ điển
+  max_word_vocab_size: 50000
+  min_word_freq: 1
 
 # Data Generation / Augmentation
 augmentation:
   lowercase: true
   use_word_pairs: false
-  max_word_pairs: 100
+  max_word_pairs: 30000
   use_sentence_chunks: true
-  chunk_min_words: 3
-  chunk_max_words: 10
-  chunk_stride: 5               # Tăng stride lên rất lớn để sinh ra cực kỳ ít sample
-  max_train_samples: 500        # Ép tập Train tối đa chỉ có 500 mẫu để loop chạy vèo vèo
+  chunk_min_words: 5
+  chunk_max_words: 24
+  chunk_stride: 2
+  max_train_samples: 300000
 
 # Model Architecture
 model:
-  max_len: 32                   # Hạ từ 256 xuống 32 (Tính toán self-attention của Transformer giảm n^2 lần)
-  d_model: 64                   # d_model siêu nhỏ
-  char_emb_dim: 32              # Tổng char_emb_dim + word_emb_dim bắt buộc phải bằng d_model (32 + 32 = 64)
-  word_emb_dim: 32
-  nhead: 2                      # Chỉ cần 2 head attention để test
-  num_encoder_layers: 1         # Chỉ dùng đúng 1 layer Transformer Encoder thay vì 4
-  dim_feedforward: 128          # Giảm khối MLP bên trong Transformer
-  dropout: 0.0                  # Test nhanh thì không cần chống overfit, để 0.0
+  max_len: 256
+  d_model: 192
+  char_emb_dim: 128
+  word_emb_dim: 64
+  nhead: 4
+  num_encoder_layers: 4
+  dim_feedforward: 768
+  dropout: 0.2
 
 # Hyperparameters & Training Settings
 training:
-  batch_size: 16                # Batch size nhỏ để không sợ tràn bộ nhớ
-  epochs: 10                     # Chỉ chạy đúng 2 epoch để xem scheduler và checkpoint hoạt động đúng không
-  learning_rate: 1.0e-3         
-  weight_decay: 0.0
+  batch_size: 64
+  epochs: 80
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
   grad_clip: 1.0
   seed: 42
-  checkpoint_path: "models/test_accent_tagger.pt" # Nên lưu vào folder models/ để quản lý
-  device: "auto"          
+  checkpoint_path: "models/accent_tagger_context.pt"
+  device: "auto"
 
 # Loss & Constraints
 loss:
   copy_loss_weight: 1.0
-  accent_loss_weight: 5.0
+  accent_loss_weight: 10.0
   use_constraint_in_training: true
