@@ -421,3 +421,67 @@ class Evaluator:
             "total_word_errors": total_word_errors,
             "total_reference_words": total_reference_words
         }
+    
+# -*- coding: utf-8 -*-
+import pandas as pd
+from tqdm import tqdm
+
+class Visualizer:
+    def __init__(self, pipeline, teencode_engine, evaluator, word_to_idx):
+        """
+        Class hỗ trợ phân loại và đánh giá trực quan kết quả sửa lỗi của hệ thống.
+        """
+        self.pipeline = pipeline
+        self.teencode_engine = teencode_engine
+        self.evaluator = evaluator
+        self.word_to_idx = word_to_idx
+
+    def analyze_predictions(self, validation_df, num_samples=200):
+        """
+        Quét qua tập dữ liệu kiểm thử, chạy pipeline và phân loại câu/từ.
+        :param validation_df: DataFrame chứa tập Validation (có cột 'input' và 'target')
+        :param num_samples: Số lượng mẫu muốn chạy phân tích trực quan
+        :return: (exact_sentences_df, error_sentence_df, error_words_df)
+        """
+        exact_sentences = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
+        error_sentence = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
+        error_words = pd.DataFrame(columns=['Error', 'Correct'])
+
+        # Giới hạn số lượng mẫu để tối ưu thời gian chạy trực quan
+        target_df = validation_df.head(num_samples)
+
+        for _, row in tqdm(target_df.iterrows(), total=len(target_df), desc="Phân tích trực quan mẫu"): 
+            input_sent = str(row['input'])
+            target_sent = str(row['target'])
+
+            # Tiền xử lý teencode
+            cleaned_input = self.teencode_engine.replace_abbreviations(input_sent)
+
+            # Quét tìm nhãn lỗi gốc từ cặp câu (cleaned_input, target_sent)
+            _, error_indices = self.evaluator.find_misspelled_words_and_targets(
+                cleaned_input, target_sent, self.word_to_idx
+            )
+
+            # Chạy qua Pipeline chính đã được đóng gói
+            fixed_sentence_str = self.pipeline.correct_sentence(cleaned_input)
+
+            target_tokens = target_sent.split()
+            fixed_tokens = fixed_sentence_str.split()
+
+            if len(target_tokens) != len(fixed_tokens):
+                continue
+
+            errors_in_sentence = 0
+            for idx in error_indices:
+                if fixed_tokens[idx] != target_tokens[idx]:
+                    errors_in_sentence += 1
+                    error_words.loc[error_words.shape[0]] = [fixed_tokens[idx], target_tokens[idx]]
+
+            # Phân loại câu sửa đúng hoàn toàn vs câu vẫn còn sót lỗi
+            if errors_in_sentence == 0 and not error_indices:
+                exact_sentences.loc[exact_sentences.shape[0]] = [input_sent, fixed_sentence_str, target_sent]
+            
+            if errors_in_sentence != 0:
+                error_sentence.loc[error_sentence.shape[0]] = [input_sent, fixed_sentence_str, target_sent]
+
+        return exact_sentences, error_sentence, error_words

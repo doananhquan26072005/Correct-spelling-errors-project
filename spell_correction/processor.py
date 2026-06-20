@@ -252,3 +252,63 @@ class FeatureExtractor:
         # 5. Sắp xếp và format đầu ra chuẩn hóa
         top_candidates.sort(key=lambda x: x[0], reverse=True)
         return [(item[1], list(item[2:])) for item in top_candidates]
+    
+class SpellCorrectionPipeline:
+    def __init__(self, cfg, evaluator, model_lm, generator, extractor_engine, ranker, word_to_idx):
+        """
+        Đóng gói Pipeline sửa lỗi chính tả tổng thể.
+        """
+        self.cfg = cfg
+        self.evaluator = evaluator
+        self.model_lm = model_lm
+        self.generator = generator
+        self.extractor_engine = extractor_engine
+        self.ranker = ranker
+        self.word_to_idx = word_to_idx
+
+    def correct_sentence(self, sentence: str) -> str:
+        """
+        Pipeline khép kín nhận diện lỗi, trích xuất đặc trưng và sửa lỗi câu hoàn chỉnh.
+        :param sentence: Chuỗi văn bản đầu vào (Đã qua xử lý teencode nếu cần)
+        :return: Chuỗi văn bản đã được sửa lỗi
+        """
+        error_indices = self.evaluator.detect_error(sentence)
+        sentence_tokens = sentence.split()
+
+        for idx in error_indices:
+            if idx >= len(sentence_tokens):
+                continue
+            error_word = sentence_tokens[idx]
+
+            # 1. Sinh ứng viên thô qua lookup
+            k_candidates = self.cfg.candidate_generation.top_k_raw if hasattr(self.cfg, 'candidate_generation') else 2
+            raw_candidates = self.generator.lookup(error_word, self.word_to_idx, k=k_candidates)
+
+            if not raw_candidates:
+                continue
+
+            # 2. Trích xuất vector đặc trưng động
+            candidates_with_features = self.extractor_engine.extract_candidates_and_features(
+                error_word=error_word,
+                sentence_words=sentence_tokens,
+                error_idx=idx,
+                error_indices=error_indices,
+                candidates=raw_candidates,
+                model_lm=self.model_lm,
+                generator=self.generator
+            )
+
+            if not candidates_with_features:
+                continue
+
+            cand_words = [item[0] for item in candidates_with_features]
+            X_infer = np.array([item[1] for item in candidates_with_features])
+
+            # 3. Dự đoán phân hạng điểm số bằng LightGBM Ranker
+            scores = self.ranker.predict(X_infer)
+            best_candidate = cand_words[np.argmax(scores)]
+
+            # 4. Thay thế từ đúng ngữ cảnh vào chuỗi token phục vụ bước tiếp theo
+            sentence_tokens[idx] = best_candidate
+
+        return " ".join(sentence_tokens)

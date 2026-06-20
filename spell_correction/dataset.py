@@ -2,6 +2,62 @@
 import re
 from datasets import DatasetDict
 
+import os
+import json
+import numpy as np
+
+class ResourceLoader:
+    def __init__(self, cfg):
+        """
+        Khởi tạo bộ nạp tài nguyên từ cấu hình hệ thống.
+        :param cfg: Cấu hình động (SimpleNamespace hoặc Dict)
+        """
+        self.cfg = cfg
+
+    def load_vocab_and_dicts(self):
+        """Nạp từ điển vocab, stopwords và xử lý sửa lỗi cú pháp file telex."""
+        print("[*] Lớp ResourceLoader: Đang nạp từ điển và telex...")
+        
+        # 1. Nạp và xử lý từ điển Vocab
+        with open(self.cfg.paths.vocab_file, 'r', encoding='utf-8') as f:
+            vocab = list(dict.fromkeys(f.read().splitlines()))
+        word_to_idx = {word: i for i, word in enumerate(vocab)}
+
+        # 2. Nạp Stopwords
+        with open(self.cfg.paths.stopwords_file, 'r', encoding='utf-8') as f:
+            stopwords = set(f.read().splitlines())
+
+        # 3. Nạp và làm sạch file Telex JSON rác (dấu phẩy thừa trước dấu ngoặc đóng)
+        with open(self.cfg.paths.telex_file, "r", encoding="utf-8") as f:
+            telex_raw = f.read()
+            telex_raw = re.sub(r',\s*}', '\n}', telex_raw)
+            telex_dict = json.loads(telex_raw)
+
+        return {
+            "vocab": vocab,
+            "word_to_idx": word_to_idx,
+            "stopwords": stopwords,
+            "telex_dict": telex_dict
+        }
+
+    def load_embeddings(self):
+        """Nạp ma trận nhúng Skip-gram từ file nén .npz."""
+        print("[*] Lớp ResourceLoader: Đang nạp ma trận nhúng Skip-gram...")
+        # Xử lý đổi đuôi file từ .pth sang _matrix.npz tương tự mã nguồn cũ
+        npz_path = self.cfg.paths.skipgram_model_file.replace(".pth", "_matrix.npz")
+        
+        if not os.path.exists(npz_path):
+            raise FileNotFoundError(f"Không tìm thấy file ma trận nhúng tại: {npz_path}")
+            
+        matrix_data = np.load(npz_path, allow_pickle=True)
+        return matrix_data['norm_embedding_matrix']
+
+    def load_all(self):
+        """Hàm tổng hợp để nạp toàn bộ tài nguyên cùng một lúc."""
+        resources = self.load_vocab_and_dicts()
+        resources["norm_embedding_matrix"] = self.load_embeddings()
+        return resources
+
 def process_dataset(examples, word_to_idx):
     """
     Tiền xử lý dữ liệu: chuyển chữ thường, xóa số, xóa dấu câu, 
