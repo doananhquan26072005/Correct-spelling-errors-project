@@ -12,6 +12,23 @@ import re
 import json
 import numpy as np
 import gdown
+import torch
+import torch.nn as nn
+
+class SkipGram(nn.Module):
+
+    def __init__(self, vocab_size, embed_dim):
+        super().__init__()
+
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.linear = nn.Linear(embed_dim, vocab_size)
+
+    def forward(self, x):
+
+        embed = self.embedding(x)
+        out = self.linear(embed)
+
+        return out
 
 class ResourceLoader:
     def __init__(self, cfg):
@@ -22,14 +39,9 @@ class ResourceLoader:
         self.cfg = cfg
 
     def _download_from_gdrive(self, file_id, output_path):
-        """Hàm hỗ trợ tải file lớn từ Google Drive bằng gdown."""
+        """Hàm hỗ trợ tải file weights lớn (.pth) từ Google Drive bằng gdown."""
         print(f"[!] Không tìm thấy file tại {output_path}. Đang tiến hành tải từ Google Drive...")
         url = f'https://drive.google.com/uc?id={file_id}'
-        
-        # Tạo thư mục cha nếu chưa tồn tại
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
-        # Tải file
         gdown.download(url, output_path, quiet=False)
         print(f"[+] Tải thành công và lưu tại: {output_path}")
 
@@ -56,33 +68,51 @@ class ResourceLoader:
             "telex_dict": telex_dict
         }
 
-    def load_embeddings(self):
-        """Kiểm tra, tải (nếu thiếu) và nạp ma trận nhúng Skip-gram từ file .npz."""
-        # Xác định đường dẫn file .npz thực tế
-        npz_path = self.cfg.paths.skipgram_model_file.replace(".pth", "_matrix.npz")
+    def create_norm_embedding_matrix(self, vocab_size):
+        """
+        Tải mô hình PyTorch, trích xuất ma trận nhúng và tính toán chuẩn hóa động.
+        """
+        model_path = self.cfg.paths.skipgram_model_file
+        device = self.cfg.DEVICE
         
-        # Kiểm tra xem file đã tồn tại cục bộ chưa
-        if not os.path.exists(npz_path):
-            # Lấy GDrive File ID từ config. Nếu không có trong config, bạn có thể truyền cứng ở đây
+        # 1. Tự động tải từ GDrive nếu file .pth chưa có ở local
+        if not os.path.exists(model_path):
             gdrive_id = getattr(self.cfg.paths, "skipgram_gdrive_id", None)
-            
             if not gdrive_id:
-                raise ValueError(
-                    f"Không tìm thấy file {npz_path} cục bộ VÀ không tìm thấy cấu hình "
-                    f"'skipgram_gdrive_id' trong file cấu hình YAML để tải về!"
-                )
-            
-            # Tiến hành tải file tự động
-            self._download_from_gdrive(gdrive_id, npz_path)
-            
-        print("[*] Lớp ResourceLoader: Đang nạp ma trận nhúng Skip-gram vào bộ nhớ...")
-        matrix_data = np.load(npz_path, allow_pickle=True)
-        return matrix_data['norm_embedding_matrix']
+                raise ValueError(f"Không thấy file {model_path} cục bộ và thiếu 'skipgram_gdrive_id' trong config!")
+            self._download_from_gdrive(gdrive_id, model_path)
+
+        print("[*] Lớp ResourceLoader: Đang khởi tạo và nạp trọng số mô hình SkipGram...")
+        
+        # 2. Lấy cấu hình chiều Vector nhúng (Mặc định là 128 nếu config không có)
+        embed_dim = self.cfg.model.embed_dim if hasattr(self.cfg, 'model') else 128
+        
+        # 3. Khởi tạo mô hình và nạp State Dict ( weights_only=True tuân thủ bảo mật Pytorch )
+        # Lưu ý: Hãy định nghĩa hoặc import class SkipGram của bạn ở đầu file
+        model_skipgram = SkipGram(vocab_size, embed_dim).to(device)
+        model_skipgram.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+        
+        # 4. Trích xuất ma trận nhúng sang Numpy
+        embeddings = model_skipgram.embedding.weight.data
+        embedding_matrix = embeddings.cpu().numpy()
+
+        # 5. Tiến hành chuẩn hóa L2-norm động để tạo ra norm_embedding_matrix
+        print("[*] Lớp ResourceLoader: Đang tính toán chuẩn hóa L2 cho Embedding Matrix...")
+        norms = np.linalg.norm(embedding_matrix, axis=1, keepdims=True)
+        norms[norms == 0] = 1
+        norm_embedding_matrix = embedding_matrix / norms
+        
+        return norm_embedding_matrix
 
     def load_all(self):
-        """Hàm tổng hợp để nạp toàn bộ tài nguyên."""
+        """Hàm điều phối: Load dicts trước -> lấy Vocab Size -> Khởi tạo Matrix sau."""
         resources = self.load_vocab_and_dicts()
-        resources["norm_embedding_matrix"] = self.load_embeddings()
+        
+        # Lấy kích thước vocab động từ file vừa nạp để truyền vào PyTorch model
+        vocab_size = len(resources["vocab"])
+        
+        # Khởi tạo ma trận nhúng dựa trên vocab_size thực tế
+        resources["norm_embedding_matrix"] = self.create_norm_embedding_matrix(vocab_size)
         return resources
 
 def process_dataset(examples, word_to_idx):

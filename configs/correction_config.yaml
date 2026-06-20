@@ -58,13 +58,13 @@
 paths:
   base_dir: "D:/NLP/project"
   vocab_file: "data/external/vocabulary.txt"
-  stopwords_file: "vietnamese-stopwords.txt"
-  telex_file: "telex.txt"
-  teen_code_file: "teen_code.txt"
-  trigram_lm_file: "trigram.bin"
+  stopwords_file: "data/external/vietnamese-stopwords.txt"
+  telex_file: "data/external/telex.txt"
+  teen_code_file: "data/external/teen_code.txt"
+  trigram_lm_file: "data/processed/trigram.bin"
   skipgram_model_file: "model_skipgram.pth"
   skipgram_gdrive_id: "1gxVmxa-6jf5wbDBoCyd_VauUuV5wo2Du"
-  lightgbm_data_path: "dataset_spell_correction.npz"
+  lightgbm_data_path: "data/processed/dataset_spell_correction.npz"
 
 model:
   embed_dim: 300
@@ -108,3 +108,5 @@ feature_weights:
   w_trigram: 0.05
   w_unigram: 0.05
   w_sim: 0.05
+
+confusion_pairs: {}

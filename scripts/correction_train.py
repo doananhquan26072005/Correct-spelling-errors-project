@@ -18,7 +18,11 @@ from common.config import load_config
 from spell_correction.processor import TeencodeProcessor, CandidateGenerator, FeatureExtractor, SpellCorrectionPipeline
 from spell_correction.evaluator import Evaluator, Visualizer
 from spell_correction.trainer import LightGBMRankerTrainer
-from spell_correction.dataset import ResourceLoader
+from spell_correction.dataset import process_dataset, split_data, ResourceLoader
+from datasets import load_dataset
+import pandas as pd
+import torch
+import kenlm
 
 def main():
     # ==========================================
@@ -78,9 +82,9 @@ def main():
 
     # Khởi tạo bộ trích xuất đặc trưng (Feature Extractor)
     extractor_engine = FeatureExtractor(
-        word_to_idx=word_to_idx,
-        norm_embedding_matrix=norm_embedding_matrix,
-        stopwords=stopwords,
+        word_to_idx=resources['word_to_idx'],
+        norm_embedding_matrix=resources['norm_embedding_matrix'],
+        stopwords=resources['stopwords'],
         cfg=cfg
     )
 
@@ -172,4 +176,4 @@ def main():
     print("\n[+] HOÀN TẤT PIPELINE KIỂM THỬ THÀNH CÔNG!")
 
 if __name__ == "__main__":
-    main()
+    main() 
