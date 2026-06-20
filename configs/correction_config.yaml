@@ -1,0 +1,109 @@
+# # config.yaml (Bổ sung phần cấu hình Hyperparameters huấn luyện)
+
+# paths:
+#   base_dir: "D:/NLP/project"
+#   vocab_file: "data/external/vocabulary.txt"
+#   stopwords_file: "vietnamese-stopwords.txt"
+#   telex_file: "telex.txt"
+#   teen_code_file: "teen_code.txt"
+#   trigram_lm_file: "trigram.bin"
+#   skipgram_model_file: "model_skipgram.pth"
+#   lightgbm_data_path: "dataset_spell_correction.npz"
+
+# model:
+#   embed_dim: 300
+#   window_size: 3
+
+# skipgram_training:
+#   batch_size: 512
+#   epochs: 10
+#   learning_rate: 0.001
+
+# ranker_training:
+#   learning_rate: 0.05
+#   num_leaves: 31
+#   min_child_samples: 20
+#   random_state: 42
+#   eval_at: [1, 3, 5]
+
+# detector_heuristics:
+#   alpha: 4.6               
+#   hard_ceiling: -3.9       
+#   hard_floor: -6.26        
+
+# candidate_generation:
+#   top_k_raw: 2             
+#   max_delete_k: 2          
+#   sub_cost_confusion: 0.4  
+#   sub_cost_adjacent: 0.5   
+#   transposition_cost: 0.5  
+
+# feature_normalization:
+#   kenlm_min_max_ceiling: 15.0  
+#   log_norm_unigram: 15.0       
+#   log_norm_bigram: 12.0        
+#   log_norm_trigram: 12.0       
+
+# feature_weights:
+#   w_kenlm: 0.30
+#   w_edit: 0.25
+#   w_len: 0.10
+#   w_bigram: 0.20
+#   w_trigram: 0.05
+#   w_unigram: 0.05
+#   w_sim: 0.05
+
+# config.yaml (Hyperparameters - Smoke Test Edition)
+
+paths:
+  base_dir: "D:/NLP/project"
+  vocab_file: "data/external/vocabulary.txt"
+  stopwords_file: "vietnamese-stopwords.txt"
+  telex_file: "telex.txt"
+  teen_code_file: "teen_code.txt"
+  trigram_lm_file: "trigram.bin"
+  skipgram_model_file: "model_skipgram.pth"
+  lightgbm_data_path: "dataset_spell_correction.npz"
+
+model:
+  embed_dim: 300
+  window_size: 1               # Hạ thấp cửa sổ ngữ cảnh để tính ma trận cực nhanh
+
+skipgram_training:
+  batch_size: 16               # Ép batch size nhỏ để test luồng nạp loader
+  epochs: 1                    # Chỉ train đúng 1 epoch để kiểm tra tính mạch lạc
+  learning_rate: 0.001
+
+ranker_training:
+  learning_rate: 0.05
+  num_leaves: 2                # Cây quyết định nông nhất có thể (chỉ cần 2 lá)
+  min_child_samples: 2         # Giảm chặn mẫu để khớp với data test ít
+  random_state: 42
+  eval_at: [1]                 # Chỉ tính NDCG tại Top-1
+
+detector_heuristics:
+  alpha: 4.6               
+  hard_ceiling: -3.9       
+  hard_floor: -6.26        
+
+candidate_generation:
+  top_k_raw: 1                 # Chỉ lấy 1 ứng viên duy nhất qua lookup
+  max_delete_k: 1            # Giảm độ sâu xóa xuống 1 ký tự để SymSpell khởi tạo tức thì
+  sub_cost_confusion: 0.4  
+  sub_cost_adjacent: 0.5   
+  transposition_cost: 0.5  
+
+feature_normalization:
+  kenlm_min_max_ceiling: 15.0  
+  log_norm_unigram: 15.0       
+  log_norm_bigram: 12.0        
+  log_norm_trigram: 12.0       
+
+feature_weights:
+  w_kenlm: 0.30
+  w_edit: 0.25
+  w_len: 0.10
+  w_bigram: 0.20
+  w_trigram: 0.05
+  w_unigram: 0.05
+  w_sim: 0.05
