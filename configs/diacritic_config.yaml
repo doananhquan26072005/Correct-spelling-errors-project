@@ -1,0 +1,53 @@
+# Data Paths & Columns
+data:
+  csv_path: "data/raw/viet_khong_dau.csv"
+  words_path: "data/external/words.txt"
+  input_col: "input"
+  target_col: "target"
+  train_ratio: 0.8
+  valid_ratio: 0.1
+  test_ratio: 0.1
+
+# Vocabulary configuration
+vocab:
+  max_word_vocab_size: 50000
+  min_word_freq: 1
+
+# Data Generation / Augmentation
+augmentation:
+  lowercase: true
+  use_word_pairs: false
+  max_word_pairs: 30000
+  use_sentence_chunks: true
+  chunk_min_words: 5
+  chunk_max_words: 24
+  chunk_stride: 2
+  max_train_samples: 300000
+
+# Model Architecture
+model:
+  max_len: 256
+  d_model: 192
+  char_emb_dim: 128
+  word_emb_dim: 64
+  nhead: 4
+  num_encoder_layers: 4
+  dim_feedforward: 768
+  dropout: 0.2
+
+# Hyperparameters & Training Settings
+training:
+  batch_size: 64
+  epochs: 80
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  seed: 42
+  checkpoint_path: "models/accent_tagger_context_v3.pt"
+  device: "auto"
+
+# Loss & Constraints
+loss:
+  copy_loss_weight: 1.0
+  accent_loss_weight: 10.0
+  use_constraint_in_training: true
