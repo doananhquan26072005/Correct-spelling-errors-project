@@ -1,2 +1,4 @@
 *.npz
 *.pth
+**/__pycache__/
+*.pyc
