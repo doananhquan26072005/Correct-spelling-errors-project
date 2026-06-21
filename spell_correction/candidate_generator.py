@@ -228,8 +228,7 @@ class CandidateGenerator:
 
         result = sorted(candidates.items(), key=lambda x: (x[1][0], -x[1][1]))
         candidate_words = [cand_word for cand_word, _ in result]
-        
-        logger.debug(f"Lookup for suspect '{word}': Generated {len(candidate_words)} early-stage candidate structures.")
+        # logger.debug(f"Lookup for suspect '{word}': Generated {len(candidate_words)} early-stage candidate structures.")
         return candidate_words
 
     

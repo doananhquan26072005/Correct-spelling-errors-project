@@ -150,14 +150,14 @@ class DiacriticRestorer:
         logits = apply_constraint_to_logits(logits, src_char, self.allowed_mask)
         return logits.argmax(dim=-1)
 
-    def process(self, text: str) -> str:
+    def process(self, text: str, stopwords) -> str:
         """Phương thức Public: Nhận vào văn bản không dấu, trả về văn bản có dấu chuẩn."""
         self.model.eval()
         start_time = time.time()
         
         raw_length = len(text)
         text = normalize_text(str(text), lowercase=self.cfg.augmentation.lowercase)
-        logger.debug(f"Inference input raw text length: {raw_length} -> Normalized length: {len(text)}")
+        # logger.debug(f"Inference input raw text length: {raw_length} -> Normalized length: {len(text)}")
 
         src_char_ids = self.char_vocab.encode(text, self.cfg.model.max_len)
         src_word_ids = encode_word_ids_per_char(
@@ -200,7 +200,7 @@ class DiacriticRestorer:
 
         restored_text = "".join(output_chars)
         elapsed_inference = time.time() - start_time
-        logger.debug(f"Single inference restoration completed in {elapsed_inference:.4f}s.")
+        # logger.debug(f"Single inference restoration completed in {elapsed_inference:.4f}s.")
         
         return restored_text
 

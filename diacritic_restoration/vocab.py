@@ -165,13 +165,13 @@ def build_vocab_from_words_file_and_dataframe(df: pd.DataFrame, cfg) -> CharVoca
     except FileNotFoundError:
         logger.warning(f"Words file NOT found at '{cfg.data.words_path}'. Building vocabulary solely using Dataframe.")
 
-    csv_texts = (
+    df_texts = (
         df[cfg.data.input_col].astype(str).tolist()
         + df[cfg.data.target_col].astype(str).tolist()
     )
 
     logger.info("Extracting distinct characters from aggregated text components...")
-    vocab.build(words_texts + csv_texts)
+    vocab.build(words_texts + df_texts)
     logger.info(f"Final initialized CharVocab size: {len(vocab):,}")
     return vocab
 

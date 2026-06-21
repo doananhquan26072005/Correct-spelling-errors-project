@@ -34,10 +34,10 @@ class AbbreviationProcessor:
         for i, word in enumerate(words):
             if word in self.abbreviation_dict:
                 if len(self.abbreviation_dict[word].split()) == 1:
-                    logger.debug(f"Teencode replacement matched: '{word}' -> '{self.abbreviation_dict[word]}'")
+                    # logger.debug(f"Teencode replacement matched: '{word}' -> '{self.abbreviation_dict[word]}'")
                     words[i] = self.abbreviation_dict[word]
                     replaced_count += 1
-        if replaced_count > 0:
-            logger.debug(f"Total shorthand replacements executed in sentence: {replaced_count}")
+        # if replaced_count > 0:
+        #     logger.debug(f"Total shorthand replacements executed in sentence: {replaced_count}")
         return " ".join(words)
         

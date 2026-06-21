@@ -1,4 +1,5 @@
 import time
+import numpy as np
 import pandas as pd
 import torch
 import kenlm
@@ -19,7 +20,8 @@ from spell_correction import (
     Evaluator,
     Visualizer,
     LightGBMRankerTrainer,
-    SkipGramTrainer
+    SkipGramTrainer,
+    SkipGram
 )
 
 logger = get_logger("SpellCorrectionMainPipeline")
@@ -92,15 +94,28 @@ def main():
         generator.fit_ngram_counts(df1_train['target'])
 
         # Train skipgram
-        skipgram_trainer = SkipGramTrainer(cfg)
-        skipgram_train_dataset = skipgram_trainer.build_dataset(df1_train["target"])
-        skipgram_trainer.train(skipgram_train_dataset)
-        norm_embedding_matrix = skipgram_trainer.get_norm_embedding()
+        # skipgram_trainer = SkipGramTrainer(cfg)
+        # skipgram_train_dataset = skipgram_trainer.build_dataset(df1_train["target"])
+        # skipgram_trainer.train(skipgram_train_dataset)
+        # norm_embedding_matrix = skipgram_trainer.get_norm_embedding()
+
+        # Load skipgram
+        model_skipgram = SkipGram(len(vocab), cfg.model.embed_dim).to(cfg.DEVICE)
+        gdown.download(id=cfg.paths.skipgram_model_url, output=cfg.paths.skipgram_model_file, quiet=False)
+        model_skipgram.load_state_dict(torch.load(cfg.paths.skipgram_model_file, map_location=cfg.DEVICE, weights_only=True))
+        embeddings = model_skipgram.embedding.weight.data
+        embedding_matrix = embeddings.cpu().numpy()
+        norms = np.linalg.norm(embedding_matrix, axis=1, keepdims=True)
+        norms[norms == 0] = 1 
+        norm_embedding_matrix = embedding_matrix / norms
 
         extractor_engine = FeatureExtractor(
             word_to_idx=word_to_idx,
             norm_embedding_matrix=norm_embedding_matrix,
-            stopwords=stopwords,
+            model_lm=model_lm,
+            counts_1=generator.counts_1,
+            counts_2=generator.counts_2,
+            counts_3=generator.counts_3,
             cfg=cfg
         )
 
@@ -110,10 +125,16 @@ def main():
         # 5. KHỞI TẠO VÀ TẢI MÔ HÌNH LIGHTGBM RANKER
         # ==========================================
         logger.info("=== BƯỚC 4: NẠP DỮ LIỆU ĐẶC TRƯNG & HUẤN LUYỆN LIGHTGBM RANKER ===")
-        ranker_trainer = LightGBMRankerTrainer(cfg)
+        ranker_trainer = LightGBMRankerTrainer(
+            abbr_processor=abbr_engine,
+            evaluator=evaluator,
+            generator=generator,
+            feature_extractor=extractor_engine,
+            cfg=cfg
+        )
         
-        X_train, y_train, group_train = ranker_trainer.build_dataset(df1_train)
-        # X_train, y_train, group_train = ranker_trainer.load_training_data(cfg.paths.lightgbm_data_path)
+        # X_train, y_train, group_train = ranker_trainer.build_dataset(df1_train, stopwords)
+        X_train, y_train, group_train = ranker_trainer.load_training_data(cfg.paths.lightgbm_data_file)
 
         ranker = ranker_trainer.train(X_train, y_train, group_train)
 
@@ -149,7 +170,8 @@ def main():
             abbr_engine=abbr_engine,
             extractor_engine=extractor_engine,
             generator=generator,
-            ranker=ranker
+            ranker=ranker,
+            stopwords=stopwords,
         )
 
         # 7.3 Đánh giá chất lượng sửa từ (Word Accuracy)
@@ -157,6 +179,7 @@ def main():
             validation_df=df1_valid,
             abbr_engine=abbr_engine,
             pipeline_correct_fn=pipeline.correct_sentence,
+            stopwords=stopwords,
             word_to_idx=word_to_idx
         )
 
@@ -164,7 +187,8 @@ def main():
         evaluator.evaluate_end_to_end(
             validation_df=df1_valid,
             abbr_engine=abbr_engine,
-            pipeline_correct_fn=pipeline.correct_sentence
+            pipeline_correct_fn=pipeline.correct_sentence,
+            stopwords=stopwords
         )
         logger.info(f"Toàn bộ chu trình đánh giá hoàn thành trong {time.time() - evaluation_start_time:.2f}s.")
 
@@ -181,6 +205,7 @@ def main():
         
         exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
             validation_df=df1_valid,
+            stopwords=stopwords,
             num_samples=200
         )
 

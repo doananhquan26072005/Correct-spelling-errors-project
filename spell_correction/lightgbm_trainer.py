@@ -9,8 +9,10 @@ from tqdm import tqdm
 
 from common.logger import get_logger
 from spell_correction.abbr_processor import AbbreviationProcessor
+from spell_correction.candidate_generator import CandidateGenerator
 from spell_correction.evaluator import Evaluator
 from spell_correction.feature_extractor import FeatureExtractor
+from spell_correction.pipeline import extract_candidates_and_features
 
 logger = get_logger(__name__)
 
@@ -19,9 +21,15 @@ class LightGBMRankerTrainer:
     """Class quản lý toàn bộ vòng đời cấu hình, huấn luyện, trích xuất dữ liệu 
     và đóng gói mô hình xếp hạng ứng viên (LightGBM LambdaRanker)."""
     
-    def __init__(self, abbr_processor: AbbreviationProcessor, evaluator: Evaluator, feature_extractor: FeatureExtractor, cfg):
+    def __init__(self, 
+                 abbr_processor: AbbreviationProcessor, 
+                 evaluator: Evaluator, 
+                 generator: CandidateGenerator, # <-- BỔ SUNG Ở ĐÂY ĐỂ TRÁNH LỖI ATTRIBUTE ERROR
+                 feature_extractor: FeatureExtractor, 
+                 cfg):
         self.abbr_processor = abbr_processor
         self.evaluator = evaluator
+        self.generator = generator              # <-- BỔ SUNG Ở ĐÂY
         self.feature_extractor = feature_extractor
         self.cfg = cfg
         self.ranker = None
@@ -31,6 +39,7 @@ class LightGBMRankerTrainer:
     def build_dataset(
         self,
         df_train: pd.DataFrame,
+        stopwords: set,
         max_negatives: int = 20
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
@@ -50,7 +59,11 @@ class LightGBMRankerTrainer:
             input_sent = self.abbr_processor.replace_abbreviations(input_sent)
             
             # Tìm lỗi sai và vị trí
-            error_pairs, error_indices = self.evaluator.find_misspelled_words_and_targets(input_sent, target_sent)
+            error_pairs, error_indices = self.evaluator.find_misspelled_words_and_targets(
+                input_sent, 
+                target_sent, 
+                self.feature_extractor.word_to_idx
+            )
             
             if not error_pairs:
                 continue 
@@ -61,12 +74,16 @@ class LightGBMRankerTrainer:
             for i in range(len(error_indices)):
                 error_word, correct_word = error_pairs[i]
 
-                # Trích xuất ứng viên và vector đặc trưng
-                candidates_with_scores = self.feature_extractor.extract_candidates_and_features(
-                    error_word, 
-                    sentence_words, 
-                    error_indices[i], 
-                    error_indices
+                # Trích xuất ứng viên và vector đặc trưng qua hàm điều phối
+                candidates_with_scores = extract_candidates_and_features(
+                    error_word=error_word, 
+                    sentence_words=sentence_words, 
+                    error_idx=error_indices[i], 
+                    error_indices=error_indices,
+                    generator=self.generator,           # Đã có self.generator từ __init__
+                    extractor=self.feature_extractor,
+                    stopwords=stopwords,
+                    cfg=self.cfg
                 )
                 
                 if not candidates_with_scores:

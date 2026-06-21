@@ -1,18 +1,759 @@
-2026-06-21 02:41:11 - [diacritic_restoration.models] - INFO - ContextAwareAccentTagger architecture initialized | Char Emb: 128 | Word Emb: 64 | Heads: 4 | Layers: 4
-ration.vocab] - WARNING - Words file NOT found at 'data/external/words.txt'. Building vocabulary solely using Dataframe.
-2026-06-21 02:40:16 - [diacritic_restoration.vocab] - INFO - Extracting distinct characters from aggregated text components...
-2026-06-21 02:40:19 - [diacritic_restoration.vocab] - INFO - Ch2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === GIAI ĐOẠN 4: NẠP CHECKPOINT TỐI ƯU ĐỂ ĐÁNH GIÁ KIỂM THỬ ===
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === DEMO SUY LUẬN THỰC TẾ (INFERENCE) ===
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #1 | Inference time: 65.58ms
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : toi ten la
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : tôi tên là
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #2 | Inference time: 14.70ms
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : mot nguoi mat tich o ho chua nuoc nuoc trong.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : một người mắt tích ở hộ chứa nước nước trọng.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #3 | Inference time: 18.33ms
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : nhung hinh anh dac sac nhat ve vong chung ket world cup.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : những hình ảnh đặc sắc nhất về vòng chứng kết world cúp.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - Sample #4 | Inference time: 15.04ms
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [IN]  : apple se ra mat ipad duoc thiet ke lai trong thang 4?.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO -   > [OUT] : apple sẽ ra mắt ipađ được thiết kế lại trong tháng 4?.
-2026-06-21 02:41:11 - [DiacriticMainPipeline] - INFO - === PIPELINE HOÀN THÀNH BIÊN DỊCH BƯỚC 1 TRONG 108.16s ===
+2026-06-21 12:48:43 - [diacritic_restoration.model] - DEBUG - PositionalEncoding initialized with max2026-06-21 12:48:43 - [spell_correction.evaluator] - INFO - Evaluating Pipeline Word Accuracy metrics...
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO - ==================== KẾT QUẢ ĐÁNH GIÁ WORD ACCURACY ====================
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO -  • Tổng số từ lỗi mô hình thực xử lý : 159
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO -  • Số từ sửa trúng đáp án (Correct)   : 103
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO -  • Word Accuracy (Độ chính xác từ)  : 64.78%
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO - ========================================================================
+2026-06-21 12:49:21 - [spell_correction.evaluator] - INFO - Launching final End-to-End system validation sweep...
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO - ==================== BÁO CÁO TOÀN CỤC END-TO-END ====================
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO -  • Tổng số câu đưa vào đánh giá      : 100
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO -  • Tổng số từ trong tập đích (N)     : 1,051
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO -  • Tổng số từ lỗi mô hình để sót/sinh : 286
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO -  • WER (Word Error Rate - Càng thấp càng tốt) : 27.21%
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO -  • SER (Sentence Exact Match - Càng cao càng tốt): 34.00%
+2026-06-21 12:50:01 - [spell_correction.evaluator] - INFO - =====================================================================
+12:48:43 - [NLPPipeline] - INFO -   > [OUT] : lỗi khuyến về chế độ ăn cho người cáo tuổi
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #3 | Inference time: 18.00ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : tym
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : tym
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #4 | Inference time: 21.20ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : sau khi lien tuc giu vi tri thu trong cac vong bo phieu truoc ba liz truss da vuot qua ba mordaunt de tro thanh doi thu cua ong sunak trong cuoc dua vao ghe thu tuong voi phieu ung ho
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : sâu khi liên tục giữ vị trí thủ trong các vòng bộ phiếu trước bà liz truss đã vượt quá bà morđáưnt để trợ thành đối thủ của ông sưnák trong cuộc đưa vào ghế thủ tướng với phiếu ủng hỗ
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #5 | Inference time: 18.75ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : lo dien anh chang khien chi hoi dieu dung
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : lò điện ảnh chẳng khiến chị hội điều đũng
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #6 | Inference time: 18.42ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : mua sam tai four seasons macao
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : mùa sắm tại foụr seảsons mảcảo
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #7 | Inference time: 19.24ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : ngoai gom no vamc con phai lam gi
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : ngoài gồm nó vảmc còn phải làm gì
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #8 | Inference time: 25.64ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : that phi thuong olivier echouafni nguoi tung la hlv dt nu phap va psg chung y kien cac co gai tap luyen miet mai cho den khi kiet suc khien toi nhieu lan phai ngan ho lai
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : thật phí thương oliviêr ệchoúàfni người từng là hlv đt nữ pháp và psg chúng ý kiến các cô gái tập luyện miệt mại cho đến khi kiệt sức khiến tôi nhiều lần phải ngắn họ lại
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #9 | Inference time: 19.06ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : ky niem nam cac chien si cuu tu phu quoc tro ve
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : kỷ niệm năm các chiến sĩ cựự từ phú quốc trợ về
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - Sample #10 | Inference time: 18.57ms
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [IN]  : them mot doi nam nu chet vi tinh
+2026-06-21 12:48:43 - [NLPPipeline] - INFO -   > [OUT] : thêm một đối nắm nữ chết vị tình
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - === BẮT ĐẦU ĐÁNH GIÁ ĐỊNH LƯỢNG CHO KHÔI PHỤC DẤU ===
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - === PHẦN 6: ĐÁNH GIÁ HỆ THỐNG TRÊN TẬP TEST CHUNG (KHÔNG CHIA TÁCH) ===
+2026-06-21 12:48:43 - [NLPPipeline] - INFO - --- Đang chạy đánh giá Chuỗi liên kết (Diacritic + Spell) trên df_test chung ---
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - Input text: giọng thế này đừng nên thử vs nhạc dance
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - Final corrected text: giọng thế này đừng nên thử với nhạc dance
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - Input text: lại lànguy cơ bị nhiễn vô cùng thấp chủ quan một cái là đi luôn
+2026-06-21 12:48:43 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:44 - [NLPPipeline] - DEBUG - Final corrected text: lại làng cơ bị nhiễm vô cùng thấp chủ quan một cái là đi luôn
+2026-06-21 12:48:44 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:44 - [NLPPipeline] - DEBUG - Input text: chời qươi nhắc chi zậy ông nội tuân này
+2026-06-21 12:48:44 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:45 - [NLPPipeline] - DEBUG - Final corrected text: cười tươi nhắc chi vậy ông nội tuân này
+2026-06-21 12:48:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:45 - [NLPPipeline] - DEBUG - Input text: du có kíh thước nhỏ gọn lhnưg tên lửxa này có hteer itêu det xe tang cách x hơn km
+2026-06-21 12:48:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Final corrected text: du có kích thước nhỏ gọn nhưng tên lửa này có thể kết ém xe tang cách x hơn km
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Input text: đi âu cơ với cộng hoà coi có kẹt ko
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Final corrected text: đi âu cơ với cộng hòa coi có kẹt không
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Input text: dieu tra vien hon phu nu da de xuat canh cao
+2026-06-21 12:48:46 - [NLPPipeline] - DEBUG - Restored text: điều trả viên hơn phụ nữ đã đễ xuất cảnh cáo
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Final corrected text: điều trả viên hơn phụ nữ đã đề xuất cảnh cáo
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Input text: chẳng chê tr nhưng thật sự là k đủ cho giá đình độc lập nhé
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Final corrected text: chẳng chê tr nhưng thật sự là không đủ cho giá đình độc lập nhé
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Input text: noi dua co bom bi phat trieu dong
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Restored text: nói đưa cổ bơm bị phạt triệu đồng
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Final corrected text: nói đưa cổ bơm bị phạt triệu đồng
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Input text: kỳ duyêen kim tuyen mặc ton sur ton dự ựs kiện
+2026-06-21 12:48:47 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:48 - [NLPPipeline] - DEBUG - Final corrected text: kỳ duyên kim tuyen mặc ton ở ton dự sự kiện
+2026-06-21 12:48:48 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:48 - [NLPPipeline] - DEBUG - Input text: mỹ tâm naji ht sai nời trênw sóng rtuyền hình
+2026-06-21 12:48:48 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Final corrected text: mỹ tâm tại ht sai ơi trên sóng truyền hình
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Input text: duc duong va minh chau chan thuong nhe
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Restored text: đức đường và mình châu chặn thương nhẹ
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Final corrected text: đức đường và mình châu chặn thương nhẹ
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Input text: ba đứa tẻr chế tđối thuwơng tâm owr ao ưowsc sau nhà
+2026-06-21 12:48:49 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:53 - [NLPPipeline] - DEBUG - Final corrected text: ba đứa trẻ chế đối tượng tâm ở ao ước sau nhà
+2026-06-21 12:48:53 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:53 - [NLPPipeline] - DEBUG - Input text: la nguoi gan bo voi nghe hon nam ong nguyen ngoc oanh doi truong doi cuu ho bai tam ha long cho biet doi gom khoang nguoi
+2026-06-21 12:48:53 - [NLPPipeline] - DEBUG - Restored text: là người gắn bộ với nghệ hơn nằm ông nguyễn ngọc oánh đối trưởng đối cứứ hồ bài tâm hà lòng cho biết đối gồm khoảng người
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Final corrected text: là người gắn bộ với nghệ hơn nằm ông nguyễn ngọc oánh đội trưởng đội chưa hồ bài tâm hà lòng cho biết đôi gồm khoảng người
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Input text: cuoc dua ngua trong con mua
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Restored text: cuộc đùa ngừa trong còn mùa
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Final corrected text: cuộc đùa ngừa trong còn mùa
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Input text: út tuyền k mình chơi lớn gần ngày r mua
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Final corrected text: út tuyền không mình chơi lớn gần ngày rồi mua
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Input text: chung cu ay khien toa an cac cap ra phan quyet anh vay no cua tinh cu de mua nha dong thoi buoc anh phai tra khoan no ti dong
+2026-06-21 12:48:54 - [NLPPipeline] - DEBUG - Restored text: chứng cứ ấy khiến tòà ăn các cấp ra phản quyết ánh vậy nợ của tỉnh cứ để mùa nhà đồng thời bước ánh phải trả khoán nó tỉ đồng
+2026-06-21 12:48:55 - [NLPPipeline] - DEBUG - Final corrected text: chứng cứ ấy khiến toàn ăn các cấp ra phán quyết ánh vậy nợ của tỉnh cứ để mùa nhà đồng thời bước ánh phải trả khoán nó tỉ đồng
+2026-06-21 12:48:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:55 - [NLPPipeline] - DEBUG - Input text: cái j nó nhổng lên v abe
+2026-06-21 12:48:55 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:57 - [NLPPipeline] - DEBUG - Final corrected text: cái gì nó không lên v abe
+2026-06-21 12:48:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:57 - [NLPPipeline] - DEBUG - Input text: ong nguyen đắc vinh noi ve benh hinh thuc trong doan
+2026-06-21 12:48:57 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Final corrected text: ong nguyen đắc vinh noi xem bên hinh thủ trong doan
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Input text: lỡ pé có cu anh có thương pé hok
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Final corrected text: lỡ pé có cu anh có thương pé không
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Input text: nhà ở sã oojio fânq úc đầ utư ít riủ ro
+2026-06-21 12:48:58 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:48:59 - [NLPPipeline] - DEBUG - Final corrected text: nhà ở xã hội lần úc đâu sự ít rủi ro
+2026-06-21 12:48:59 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:48:59 - [NLPPipeline] - DEBUG - Input text: này thì chếc đói cũng không ăn mất
+2026-06-21 12:48:59 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Final corrected text: này thì chết đói cũng không ăn mất
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Input text: loi nguyen nam nham vao nguoi ban rau
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Restored text: lối nguyễn năm nhằm vào người bạn râu
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Final corrected text: lối nguyễn năm nhằm vào người bạn râu
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Input text: vinaphone chính thuwsc lnê tjếng việc xi mlhập nậu
+2026-06-21 12:49:00 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Final corrected text: vinaphone chính thức lên tiếng việc xi lập hậu
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Input text: chúng tôi lại ko đc xem hề miễn phí
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Final corrected text: chúng tôi lại không được xem hề miễn phí
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Input text: chuyên cơ tổng tkống zimbabwe bị từ chối và hông fận việt nam
+2026-06-21 12:49:02 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Final corrected text: chuyên cơ tổng thống zimbabwe bị từ chối và hông dân việt nam
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Input text: thanh ly vay ao k k cac mom vao xem thu nhe
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Restored text: thành lý vậy áo k k các mồm vào xem thủ nhé
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Final corrected text: thành lý vậy áo không không các mồm vào xem thủ nhé
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Input text: bangkok post viet nam dat ky luc ve giai ngan von fdi
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Restored text: bángkok post việt năm đất kỷ lục về giải ngân vốn fdi
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Final corrected text: bángkok post việt năm đất kỷ lục về giải ngân vốn fdi
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Input text: bị thao túng bấy lâu k bíc
+2026-06-21 12:49:04 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:05 - [NLPPipeline] - DEBUG - Final corrected text: bị thao túng bấy lâu không bị
+2026-06-21 12:49:05 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:05 - [NLPPipeline] - DEBUG - Input text: ngườj đàn ông go bafn phím nhan hnhất thế giới bằng mũi
+2026-06-21 12:49:05 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: người đàn ông go bàn phím nhan nhất thế giới bằng mũi
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: t thấy b bảo có cái dự án từ hè năm nào chưa thực hiện để t góp vốn vào nhở
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: t thấy b bảo có cái dự án từ hè năm nào chưa thực hiện để t góp vốn vào nhở
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: chờ cái loz
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: chờ cái lồn
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: chung toi an rung
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: chúng tôi ăn rừng
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: chúng tôi ăn rừng
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: imf ha du bao tang truong kinh te nam cua cac nuoc dang phat trien o chau a
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: imf hạ dự bảo tầng trưởng kinh tế năm của các nước đăng phát triển ở châu á
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: imf hạ dự bảo tầng trưởng kinh tế năm của các nước đăng phát triển ở châu á
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: pham huong giup ngoc loan tranh lo hang khi mac sexy
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: phạm hướng giúp ngọc loạn tránh lộ hàng khi mặc sexy
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: phạm hướng giúp ngọc loạn tránh lộ hàng khi mặc sexy
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: nick j ấy nhỉ
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: nick gì ấy nhỉ
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: ông bô vi đai
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: ông bô vi đai
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: ngaukraine se chien tranh khi dot lan vao mua thu toi
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: ngàũkràĩnê sẽ chiến tránh khí đốt lần vào mùa thứ tới
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: ngàũkràĩnê sẽ chiến tránh khí đốt lần vào mùa thứ tới
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: tuk
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: tuk
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: tư
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: zú
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: vú
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: thoi dai gi ma dan ba con gai an noi vo duyen qua a
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Restored text: thôi đài gì mà đàn bà còn gái ăn nói vợ duyên quá á
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Final corrected text: thôi đài gì mà đàn bà còn gái ăn nói vợ duyên quá á
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text: inhy vjênn của passerelles numériques cos việc lmp gnya khiq tốt nghipệ
+2026-06-21 12:49:07 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Final corrected text: anh viện của passerelles numériques có việc làm gây khi tốt nghiệp
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Input text: tai nan duong dua kinh hoang nhu phim chien tranh
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Restored text: tại nạn đường đưa kính hoàng như phim chiến tránh
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Final corrected text: tại nạn đường đưa kính hoàng như phim chiến tránh
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Input text: dong thoi no duoc trang bi mam duc voi kich thuoc inch binh xang dung tich lit phanh dia thuy luc tren banh truoc va phanh tang trong o phia sau
+2026-06-21 12:49:08 - [NLPPipeline] - DEBUG - Restored text: đồng thời nỗ được trạng bị mầm đức với kích thuộc inch bình xăng dụng tích lít phanh địa thủy lực trên bánh trước và phanh tăng trong ở phía sâu
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Final corrected text: đồng thời bố được trạng bị mầm đức với kích thuộc inch bình xăng dung tích lít phanh địa thủy lực trên bánh trước và phanh tăng trong ở phía sâu
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Input text: suc tre tam huyet va niem dam me
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Restored text: sức trẻ tâm huyết và niềm đàm mê
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Final corrected text: sức trẻ tâm huyết và niềm đàm mê
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Input text: philippines dong dat do richter nguoi thiet mang
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Restored text: philippines động đất độ richter người thiết mạng
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Final corrected text: philippines động đất độ richter người thiết mạng
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Input text: hèng mà vẫn dính drama
+2026-06-21 12:49:09 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Final corrected text: hèn mà vẫn dính drama
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Input text: chay truoc la vua
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Restored text: cháy trước là vừa
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Final corrected text: cháy trước là vừa
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Input text: ban dau freund phai thue ca phien dich rieng cho tien dao nguoi senegal de hỗ tro anh trong giao tiep
+2026-06-21 12:49:10 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:11 - [NLPPipeline] - DEBUG - Final corrected text: ban mà freund phai thì ca phê dục riêng cho tien dao người senegal de hơn tro anh trong giao tiếp
+2026-06-21 12:49:11 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:11 - [NLPPipeline] - DEBUG - Input text: day nghe truyen dat cong thuc kinh nghiem
+2026-06-21 12:49:11 - [NLPPipeline] - DEBUG - Restored text: đẩy nghệ truyền đất công thúc kính nghiệm
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: đẩy nghệ truyền đất công tác kính nhiệm
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: costa rica bi don ep va kem new zealand ve rat nhieu thong ke tren san tuy nhiên lai co ban thang quyet dinh vao khoanh khac it ai ngo toi
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: costa rica bi don xem va kem new zealand xem rat như thong ke trẻ san tuy nhiên lai co ban thang quy dinh vao khoanh khac it ai ngo toi
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: mấy cái cơ bản cũng ko hiểu
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: mấy cái cơ bản cũng không hiểu
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: san choi van the my cho sinh vien
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Restored text: sân chơi văn thế mỹ cho sinh viên
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: sân chơi văn thế mỹ cho sinh viên
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: thuy trang nhật bản của chị này
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: thuy trang nhật bản của chị này
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: trường atlantic inbox b ơi
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: trường atlantic inbox b ơi
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: hoàng khánh huyền bố mình đầy tiền nên ko cần
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: hoàng khánh huyền bố mình đầy tiền nên không cần
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: t đi tắm sông cho ló mát
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: t đi tắm sông cho ló mát
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: lai ro tin don microsoft ra smartphone rieng
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Restored text: lại rõ tin đón microsoft ra smartphone riêng
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Final corrected text: lại rõ tin đón microsoft ra smartphone riêng
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text: sững sỡ trc màn công fá trên kd rtung của võ sư mỹ
+2026-06-21 12:49:12 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: sững sỡ trước màn công an trên khi tung của võ sư mỹ
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: ceo thu nhap cao nhat o new york
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Restored text: ceo thủ nhập cáo nhất ở new york
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: ceo thủ nhập cáo nhất ở new york
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: phia khong anh
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Restored text: phía không anh
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: phía không anh
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: trong nam sau khi ket hon ho co gang lam viec va da tich luy duoc trieu de di den quyet dinh mua nha voi gia trieu
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Restored text: trọng năm sâu khi kết hơn họ cố gắng làm việc và đã tích lũy được triệu để đĩ đến quyết đình mùa nhà với giá triệu
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: trọng năm sâu khi kết hơn họ cố gắng làm việc và đã tích lũy được triệu để đĩ đến quyết đình mùa nhà với giá triệu
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: cắt dây phơi trc cửa nhà b đi
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: cắt dây phơi trước cửa nhà b đi
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: clip cũ roi lúc no ban hàng chui khách hàng quen miệng lu nay lu kia gio kho mà ai bo qua duoc
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Final corrected text: clip cũ roi lúc no ban hàng chui khách hàng quen miệng lu nay lu kia bò kho mà ai bo qua duoc
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Input text: dang la voi luc xuong cho moi biet mat
+2026-06-21 12:49:13 - [NLPPipeline] - DEBUG - Restored text: đáng là với lúc xưống cho mới biết mặt
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: đáng là với lúc xuống cho mới biết mặt
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: kêu chánh quyền xuống cho tao
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: kêu chánh quyền xuống cho tao
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: viet nam thuc day hop tac giua asean voi doi tac
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Restored text: việt nam thúc đẩy hợp tác giữa asean với đối tác
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: việt nam thúc đẩy hợp tác giữa asean với đối tác
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: bn ơi bn bt gì về nước hoa ko
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: bạn ơi bạn bt gì về nước hoa không
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: lùng v đó nhưng nắm trùm cả bộ tộc
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: lùng v đó nhưng nắm trùm cả bộ tộc
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: ha linh khong bi loai
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Restored text: hà lính không bị loại
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: hà lính không bị loại
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: đến khi nó lớn tầm t ý
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Final corrected text: đến khi nó lớn tầm t ý
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text: những nảo bà vc tù và àhng tnổg
+2026-06-21 12:49:15 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Final corrected text: những bảo bà vc tù và hàng tổng
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text: rồi làm sao để đi concert của bà z
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Final corrected text: rồi làm sao để đi concert của bà z
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text: gấp z mới được ngủ chung dí t nha
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Final corrected text: gấp z mới được ngủ chung dí t nha
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text: nguyễn hữu thanh hâhhhaha nó vã ko kịp thấy
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Final corrected text: nguyễn hữu thanh hâhhhaha nó vã không kịp thấy
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text: top hoa hau viet nam khoe nhan sac rang ro trong dam da hoi
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Restored text: top hòa hậu việt nam khỏe nhân sắc rằng rõ trong đâm đã hỏi
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Final corrected text: top hòa hậu việt nam khỏe nhân sắc rằng rõ trong đâm đã hỏi
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Input text: ban ha b va fa hai chien cong mot niem tu hao
+2026-06-21 12:49:18 - [NLPPipeline] - DEBUG - Restored text: bạn hà b và fa hải chiến công một niệm tự hào
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Final corrected text: bạn hà b và fa hải chiến công một niềm tự hào
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Input text: xin thoi chuc pho chu tich xa vi dinh an danh bac
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Restored text: xịn thói chức phó chủ tịch xã vị định ăn đành bắc
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Final corrected text: xịn thói chức phó chủ tịch xã vị định ăn đành bắc
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Input text: nguyễn khánh huyền mình đi trước trend đoooó
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Final corrected text: nguyễn khánh huyền mình đi trước trend đối
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Input text: tre em hao hức voi le hoi dan gian cua tuoi tho
+2026-06-21 12:49:19 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Final corrected text: tre em hao chức voi le có dân gian cua tuoi tho
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Input text: giọng thế này đừng nên thử với nhạc dance
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Final corrected text: giọng thế này đừng nên thử với nhạc dance
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Input text: lại lànguy cơ bị nhiễn vô cùng thấp chủ quan một cái là đi luôn
+2026-06-21 12:49:21 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:23 - [NLPPipeline] - DEBUG - Final corrected text: lại làng cơ bị nhiễm vô cùng thấp chủ quan một cái là đi luôn
+2026-06-21 12:49:23 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:23 - [NLPPipeline] - DEBUG - Input text: chời qươi nhắc chi vậy ông nội tuân này
+2026-06-21 12:49:23 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:24 - [NLPPipeline] - DEBUG - Final corrected text: cười tươi nhắc chi vậy ông nội tuân này
+2026-06-21 12:49:24 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:24 - [NLPPipeline] - DEBUG - Input text: du có kíh thước nhỏ gọn lhnưg tên lửxa này có hteer itêu det xe tang cách x hơn km
+2026-06-21 12:49:24 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Final corrected text: du có kích thước nhỏ gọn nhưng tên lửa này có thể kết ém xe tang cách x hơn km
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text: đi âu cơ với cộng hoà coi có kẹt không
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Final corrected text: đi âu cơ với cộng hòa coi có kẹt không
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text: dieu tra vien hon phu nu da de xuat canh cao
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Restored text: điều trả viên hơn phụ nữ đã đễ xuất cảnh cáo
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Final corrected text: điều trả viên hơn phụ nữ đã đề xuất cảnh cáo
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text: chẳng chê tr nhưng thật sự là không đủ cho giá đình độc lập nhé
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Final corrected text: chẳng chê tr nhưng thật sự là không đủ cho giá đình độc lập nhé
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text: noi dua co bom bi phat triệu dong
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Final corrected text: noi đa co bom bi phạt triệu dong
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text: kỳ duyêen kim tuyen mặc ton sur ton dự ựs kiện
+2026-06-21 12:49:25 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Final corrected text: kỳ duyên kim tuyen mặc ton ở ton dự sự kiện
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Input text: đầu thứ tóc rồi mà còn bị trẻ trâu levi lừa
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Final corrected text: đầu thứ tóc rồi mà còn bị trẻ trâu levi lừa
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Input text: mỹ tâm naji ht sai nời trênw sóng rtuyền hình
+2026-06-21 12:49:27 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Final corrected text: mỹ tâm tại ht sai ơi trên sóng truyền hình
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Input text: duc duong va minh chau chan thuong nhe
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Restored text: đức đường và mình châu chặn thương nhẹ
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Final corrected text: đức đường và mình châu chặn thương nhẹ
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Input text: còn thời cưỡi ngựa bắn cung
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Final corrected text: còn thời cưỡi ngựa bắn cung
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Input text: ba đứa tẻr chế tđối thuwơng tâm owr ao ưowsc sau nhà
+2026-06-21 12:49:28 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:31 - [NLPPipeline] - DEBUG - Final corrected text: ba đứa trẻ chế đối tượng tâm ở ao ước sau nhà
+2026-06-21 12:49:31 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:31 - [NLPPipeline] - DEBUG - Input text: la người gan bo voi nghe hon nam ong nguyen ngoc oanh doi truong doi cuu ho bai tam ha long cho biết doi gom khoang người
+2026-06-21 12:49:31 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Final corrected text: la người gan bo voi nghe hon nam ong nguyen ngoc oanh đi truong bị dụ ho bai tam ha long cho biết cô gom khoang người
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text: buồn thật sự
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Final corrected text: buồn thật sự
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text: cuoc dua ngua trong con mua
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Restored text: cuộc đùa ngừa trong còn mùa
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Final corrected text: cuộc đùa ngừa trong còn mùa
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text: út tuyền không mình chơi lớn gần ngày rồi mua
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Final corrected text: út tuyền không mình chơi lớn gần ngày rồi mua
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Input text: chung cu ay khien toa an cac cap ra phan quyet anh vay no cua tinh cu de mua nha dong thoi buoc anh phai tra khoan no ti dong
+2026-06-21 12:49:32 - [NLPPipeline] - DEBUG - Restored text: chứng cứ ấy khiến tòà ăn các cấp ra phản quyết ánh vậy nợ của tỉnh cứ để mùa nhà đồng thời bước ánh phải trả khoán nó tỉ đồng
+2026-06-21 12:49:33 - [NLPPipeline] - DEBUG - Final corrected text: chứng cứ ấy khiến toàn ăn các cấp ra phán quyết ánh vậy nợ của tỉnh cứ để mùa nhà đồng thời bước ánh phải trả khoán nó tỉ đồng
+2026-06-21 12:49:33 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:33 - [NLPPipeline] - DEBUG - Input text: cái gì nó nhổng lên v abe
+2026-06-21 12:49:33 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Final corrected text: cái gì nó không lên v abe
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text: ong nguyen đắc vinh noi ve benh hinh thuc trong doan
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Final corrected text: ong nguyen đắc vinh noi xem bên hinh thủ trong doan
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text: nhiều điều kỳ thú đang chờ đón khách du lịch tới quảng bình
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Final corrected text: nhiều điều kỳ thú đang chờ đón khách du lịch tới quảng bình
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text: lỡ pé có cu anh có thương pé không
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Final corrected text: lỡ pé có cu anh có thương pé không
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text: nhà ở sã oojio fânq úc đầ utư ít riủ ro
+2026-06-21 12:49:35 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:36 - [NLPPipeline] - DEBUG - Final corrected text: nhà ở xã hội lần úc đâu sự ít rủi ro
+2026-06-21 12:49:36 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:36 - [NLPPipeline] - DEBUG - Input text: này thì chếc đói cũng không ăn mất
+2026-06-21 12:49:36 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:38 - [NLPPipeline] - DEBUG - Final corrected text: này thì chết đói cũng không ăn mất
+2026-06-21 12:49:38 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:38 - [NLPPipeline] - DEBUG - Input text: loi nguyen nam nham vao người ban rau
+2026-06-21 12:49:38 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:39 - [NLPPipeline] - DEBUG - Final corrected text: có nguyen nam nham vao người ban rau
+2026-06-21 12:49:39 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:39 - [NLPPipeline] - DEBUG - Input text: vinaphone chính thuwsc lnê tjếng việc xi mlhập nậu
+2026-06-21 12:49:39 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Final corrected text: vinaphone chính thức lên tiếng việc xi lập hậu
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Input text: chúng tôi lại không được xem hề miễn phí
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Final corrected text: chúng tôi lại không được xem hề miễn phí
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Input text: chuyên cơ tổng tkống zimbabwe bị từ chối và hông fận việt nam
+2026-06-21 12:49:40 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Final corrected text: chuyên cơ tổng thống zimbabwe bị từ chối và hông dân việt nam
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text: thanh ly vay ao không không cac mom vao xem thu nhe
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Final corrected text: thanh ly vay ao không không cac mom vao xem thu nhe
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text: trà ly em lại là tấm gương sáng hơn lần
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Final corrected text: trà ly em lại là tấm gương sáng hơn lần
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text: bangkok post viet nam dat ky luc ve giai ngan von fdi
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Restored text: bángkok post việt năm đất kỷ lục về giải ngân vốn fdi
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Final corrected text: bángkok post việt năm đất kỷ lục về giải ngân vốn fdi
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text: bị thao túng bấy lâu không bíc
+2026-06-21 12:49:42 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Final corrected text: bị thao túng bấy lâu không bị
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text: nghe nhạc của sếp em lại tưởng em đang nghe cô dâu tuổi
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Final corrected text: nghe nhạc của sếp em lại tưởng em đang nghe cô dâu tuổi
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text: có vẻ hay nhưng nói có đoạn giật mình thì lại sợ hix tim mình nhỏ tẹo nên sợ phim kinh dị
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Final corrected text: có vẻ hay nhưng nói có đoạn giật mình thì lại sợ hix tim mình nhỏ tẹo nên sợ phim kinh dị
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text: ngườj đàn ông go bafn phím nhan hnhất thế giới bằng mũi
+2026-06-21 12:49:43 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: người đàn ông go bàn phím nhan nhất thế giới bằng mũi
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: t thấy b bảo có cái dự án từ hè năm nào chưa thực hiện để t góp vốn vào nhở
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: t thấy b bảo có cái dự án từ hè năm nào chưa thực hiện để t góp vốn vào nhở
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: chờ cái lồn
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: chờ cái lồn
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: linh mục zimbabwe tiết lộ quá trình thuyết phục ông mugabe từ chức
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: linh mục zimbabwe tiết lộ quá trình thuyết phục ông mugabe từ chức
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: lâm đình khoa được anh nhá
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: lâm đình khoa được anh nhá
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: chung toi an rung
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: chúng tôi ăn rừng
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: chúng tôi ăn rừng
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: imf ha du bao tang truong kinh te nam cua cac nuoc dang phat trien o chau anh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: imf hạ dự bảo tầng trưởng kinh tế năm của các nước đáng phát triển ở châu ảnh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: imf hạ dự bảo tầng trưởng kinh tế năm của các nước đáng phát triển ở châu ảnh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: pham huong giup ngoc loan tranh lo hang khi mac sexy
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: phạm hướng giúp ngọc loạn tránh lộ hàng khi mặc sexy
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: phạm hướng giúp ngọc loạn tránh lộ hàng khi mặc sexy
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: nick gì ấy nhỉ
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: nick gì ấy nhỉ
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: ông bô vi đai
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: ông bô vi đai
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: ngaukraine se chien tranh khi dot lan vao mua thu toi
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: ngàũkràĩnê sẽ chiến tránh khí đốt lần vào mùa thứ tới
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: ngàũkràĩnê sẽ chiến tránh khí đốt lần vào mùa thứ tới
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: tuk
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: tuk
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: tư
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: vú
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: vú
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: thoi dai gi ma dan ba con gai an noi vo duyen qua anh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Restored text: thôi đài gì mà đàn bà còn gái ăn nói vợ duyên quá ảnh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Final corrected text: thôi đài gì mà đàn bà còn gái ăn nói vợ duyên quá ảnh
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text: inhy vjênn của passerelles numériques cos việc lmp gnya khiq tốt nghipệ
+2026-06-21 12:49:45 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Final corrected text: anh viện của passerelles numériques có việc làm gây khi tốt nghiệp
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Input text: có phải tự nhiên hay lại là một sự sắp đặt
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Final corrected text: có phải tự nhiên hay lại là một sự sắp đặt
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Input text: tai nan duong dua kinh hoang nhu phim chien tranh
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Restored text: tại nạn đường đưa kính hoàng như phim chiến tránh
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Final corrected text: tại nạn đường đưa kính hoàng như phim chiến tránh
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Input text: dong thoi no duoc trang bi mam duc voi kich thuoc inch binh xang dung tich lit phanh dia thuy luc tren banh truoc va phanh tang trong o phia sau
+2026-06-21 12:49:46 - [NLPPipeline] - DEBUG - Restored text: đồng thời nỗ được trạng bị mầm đức với kích thuộc inch bình xăng dụng tích lít phanh địa thủy lực trên bánh trước và phanh tăng trong ở phía sâu
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Final corrected text: đồng thời bố được trạng bị mầm đức với kích thuộc inch bình xăng dung tích lít phanh địa thủy lực trên bánh trước và phanh tăng trong ở phía sâu
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Input text: suc tre tam huyet va niem dam me
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Restored text: sức trẻ tâm huyết và niềm đàm mê
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Final corrected text: sức trẻ tâm huyết và niềm đàm mê
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Input text: ủa công an và côn đồ không phải là hả
+2026-06-21 12:49:47 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Final corrected text: ủa công an và công đồ không phải là hả
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Input text: philippines dong dat do richter người thiet mang
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Final corrected text: philippines dong dat do richter người thịt mang
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Input text: hèng mà vẫn dính drama
+2026-06-21 12:49:48 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Final corrected text: hèn mà vẫn dính drama
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Input text: chay truoc la vua
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Restored text: cháy trước là vừa
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Final corrected text: cháy trước là vừa
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Input text: ban dau freund phai thue ca phien dich rieng cho tien dao người senegal de hỗ tro anh trong giao tiep
+2026-06-21 12:49:49 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:50 - [NLPPipeline] - DEBUG - Final corrected text: ban mà freund phai thì ca phê dục riêng cho tien dao người senegal de hơn tro anh trong giao tiếp
+2026-06-21 12:49:50 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:50 - [NLPPipeline] - DEBUG - Input text: day nghe truyen dat cong thuc kinh nghiem
+2026-06-21 12:49:50 - [NLPPipeline] - DEBUG - Restored text: đẩy nghệ truyền đất công thúc kính nghiệm
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: đẩy nghệ truyền đất công tác kính nhiệm
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: costa rica bi don ep va kem new zealand ve rat nhieu thong ke tren san tuy nhiên lai co ban thang quyet dinh vao khoanh khac it ai ngo toi
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: costa rica bi don xem va kem new zealand xem rat như thong ke trẻ san tuy nhiên lai co ban thang quy dinh vao khoanh khac it ai ngo toi
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: đầu danh hài hải ngoại có cái sừng dài thế
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: đầu danh hài hải ngoại có cái sừng dài thế
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: đêm nay ngủ đất luôn
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: đêm nay ngủ đất luôn
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: mấy cái cơ bản cũng không hiểu
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: mấy cái cơ bản cũng không hiểu
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: san choi van the my cho sinh vien
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Restored text: sân chơi văn thế mỹ cho sinh viên
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: sân chơi văn thế mỹ cho sinh viên
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: thuy trang nhật bản của chị này
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: thuy trang nhật bản của chị này
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: trường atlantic inbox b ơi
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: trường atlantic inbox b ơi
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: hoàng khánh huyền bố mình đầy tiền nên không cần
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: hoàng khánh huyền bố mình đầy tiền nên không cần
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: t đi tắm sông cho ló mát
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: t đi tắm sông cho ló mát
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: lai ro tin don microsoft ra smartphone rieng
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Restored text: lại rõ tin đón microsoft ra smartphone riêng
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: lại rõ tin đón microsoft ra smartphone riêng
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: sững sỡ trước màn công fá trên kd rtung của võ sư mỹ
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: sững sỡ trước màn công an trên khi tung của võ sư mỹ
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: ceo thu nhap cao nhat o new york
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Restored text: ceo thủ nhập cáo nhất ở new york
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: ceo thủ nhập cáo nhất ở new york
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: phia khong anh
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Restored text: phía không anh
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Final corrected text: phía không anh
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text: trong nam sau khi ket hon ho co gang lam viec va da tich luy duoc triệu de di den quyet dinh mua nha voi gia triệu
+2026-06-21 12:49:51 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Final corrected text: trong nam sau khi xem hon ho co gang lam về va da tục duy duoc triệu de di em quy dinh mua nha voi gia triệu
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Input text: cắt dây phơi trước cửa nhà b đi
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Final corrected text: cắt dây phơi trước cửa nhà b đi
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Input text: clip cũ roi lúc no ban hàng chui khách hàng quen miệng lu nay lu kia gio kho mà ai bo qua duoc
+2026-06-21 12:49:52 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:53 - [NLPPipeline] - DEBUG - Final corrected text: clip cũ roi lúc no ban hàng chui khách hàng quen miệng lu nay lu kia bò kho mà ai bo qua duoc
+2026-06-21 12:49:53 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:53 - [NLPPipeline] - DEBUG - Input text: dang la voi luc xuong cho moi biết mat
+2026-06-21 12:49:53 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: dang la voi là xong cho moi biết mat
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: tưởng các bác thế nào
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: tưởng các bác thế nào
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: ba chàng lính ngự lâm đã có phiên bản d
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: ba chàng lính ngự lâm đã có phiên bản d
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: kêu chánh quyền xuống cho tao
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: kêu chánh quyền xuống cho tao
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: viet nam thuc day hop tac giua asean voi doi tac
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Restored text: việt nam thúc đẩy hợp tác giữa asean với đối tác
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: việt nam thúc đẩy hợp tác giữa asean với đối tác
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: rip lòi le cm
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: rip lòi le cm
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: bạn ơi bạn bt gì về nước hoa không
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: bạn ơi bạn bt gì về nước hoa không
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: lùng v đó nhưng nắm trùm cả bộ tộc
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Final corrected text: lùng v đó nhưng nắm trùm cả bộ tộc
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text: dăm ba con dao anh thích em tặng anh luôn nè
+2026-06-21 12:49:54 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Final corrected text: dăm ba con dao anh thích em tặng anh luôn nè
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text: cái máu lồn gì cũng kêu lỗ là thế lồn nào nhỉ
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Final corrected text: cái máu lồn gì cũng kêu lỗ là thế lồn nào nhỉ
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text: khi bạn vừa ngủ dậy chưa kịp kéo quần thì phải đi event
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Final corrected text: khi bạn vừa ngủ dậy chưa kịp kéo quần thì phải đi event
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text: ha linh khong bi loai
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Restored text: hà lính không bị loại
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Final corrected text: hà lính không bị loại
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text: đến khi nó lớn tầm t ý
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Final corrected text: đến khi nó lớn tầm t ý
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text: những nảo bà vc tù và àhng tnổg
+2026-06-21 12:49:55 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: những bảo bà vc tù và hàng tổng
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: rồi làm sao để đi concert của bà z
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: rồi làm sao để đi concert của bà z
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: gấp z mới được ngủ chung dí t nha
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: gấp z mới được ngủ chung dí t nha
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: nguyễn hữu thanh hâhhhaha nó vã không kịp thấy
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: nguyễn hữu thanh hâhhhaha nó vã không kịp thấy
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: cố lên các bạn ơi
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: cố lên các bạn ơi
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: top hoa hau viet nam khoe nhan sac rang ro trong dam da hoi
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Restored text: top hòa hậu việt nam khỏe nhân sắc rằng rõ trong đâm đã hỏi
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Final corrected text: top hòa hậu việt nam khỏe nhân sắc rằng rõ trong đâm đã hỏi
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Input text: ban ha b va fa hai chien cong mot niem tu hao
+2026-06-21 12:49:57 - [NLPPipeline] - DEBUG - Restored text: bạn hà b và fa hải chiến công một niệm tự hào
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Final corrected text: bạn hà b và fa hải chiến công một niềm tự hào
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Input text: xin thoi chuc pho chu tich xa vi dinh an danh bac
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Restored text: xịn thói chức phó chủ tịch xã vị định ăn đành bắc
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Final corrected text: xịn thói chức phó chủ tịch xã vị định ăn đành bắc
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Input text: nguyễn khánh huyền mình đi trước trend đoooó
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Final corrected text: nguyễn khánh huyền mình đi trước trend đối
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Input text: tre em hao hức voi le hoi dan gian cua tuoi tho
+2026-06-21 12:49:59 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:50:01 - [NLPPipeline] - DEBUG - Final corrected text: tre em hao chức voi le có dân gian cua tuoi tho
+2026-06-21 12:50:01 - [NLPPipeline] - DEBUG - --------------------------------------------------------------------------------
+2026-06-21 12:50:01 - [NLPPipeline] - DEBUG - Input text: ông trần dần nói hay quá
+2026-06-21 12:50:01 - [NLPPipeline] - DEBUG - Input text already contains diacritics. Skipping diacritic restoration.
+2026-06-21 12:50:01 - [NLPPipeline] - DEBUG - Final corrected text: ông trần dần nói hay quá
+2026-06-21 12:50:01 - [NLPPipeline] - INFO - === PIPELINE TOÀN DIỆN HOÀN THÀNH TRONG 185.18s ===

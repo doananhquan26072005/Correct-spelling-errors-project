@@ -5,15 +5,15 @@ from common.logger import get_logger
 logger = get_logger(__name__)
 
 class Visualizer:
-    def __init__(self, pipeline, teencode_engine, evaluator, word_to_idx):
+    def __init__(self, pipeline, abbr_engine, evaluator, word_to_idx):
         """Class hỗ trợ phân loại và đánh giá trực quan kết quả sửa lỗi của hệ thống."""
         self.pipeline = pipeline
-        self.teencode_engine = teencode_engine
+        self.abbr_engine = abbr_engine
         self.evaluator = evaluator
         self.word_to_idx = word_to_idx
         logger.info("Visualizer module online for qualitative output sampling.")
 
-    def analyze_predictions(self, validation_df, num_samples=200):
+    def analyze_predictions(self, validation_df, stopwords, num_samples=200):
         """Quét qua tập dữ liệu kiểm thử, chạy pipeline và phân loại câu/từ."""
         logger.info(f"Sampling {num_samples} validation queries for visual performance breakdown...")
         
@@ -28,10 +28,10 @@ class Visualizer:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            cleaned_input = self.teencode_engine.replace_abbreviations(input_sent)
+            cleaned_input = self.abbr_engine.replace_abbreviations(input_sent)
             _, error_indices = self.evaluator.find_misspelled_words_and_targets(cleaned_input, target_sent, self.word_to_idx)
 
-            fixed_sentence_str = self.pipeline.correct_sentence(cleaned_input)
+            fixed_sentence_str = self.pipeline.correct_sentence(cleaned_input, stopwords)
 
             target_tokens = target_sent.split()
             fixed_tokens = fixed_sentence_str.split()

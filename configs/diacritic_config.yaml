@@ -43,7 +43,7 @@ training:
   weight_decay: 1.0e-4
   grad_clip: 1.0
   seed: 42
-  checkpoint_path: "models/accent_tagger_context.pt"
+  checkpoint_path: "models/accent_tagger_context_v3.pt"
   device: "auto"
 
 # Loss & Constraints

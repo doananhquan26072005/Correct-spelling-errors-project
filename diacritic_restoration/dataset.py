@@ -84,22 +84,28 @@ class DiacriticDataLoaderFactory:
         self.processor = DiacriticDataProcessor(cfg)
         logger.info("DiacriticDataLoaderFactory initialized successfully.")
 
-    def build_loaders_and_vocabs(self) -> Tuple[DataLoader, DataLoader, DataLoader, CharVocab, WordVocab]:
-        logger.info(f"Loading raw CSV data from: {self.cfg.data.csv_path}")
+    def build_loaders_and_vocabs(self, df_train: pd.DataFrame, df_valid: pd.DataFrame, df_test: pd.DataFrame) -> Tuple[DataLoader, DataLoader, DataLoader, any, any]:
+        logger.info("Building loaders and vocabs from provided df2 DataFrames.")
         start_time = time.time()
 
-        raw_df = pd.read_csv(self.cfg.data.csv_path)
-        raw_df = raw_df[[self.cfg.data.input_col, self.cfg.data.target_col]].dropna().reset_index(drop=True)
-        logger.debug(f"Loaded raw_df shape after dropna: {raw_df.shape}")
+        # Hàm phụ trợ để chuẩn hóa và làm sạch từng phần dữ liệu
+        def prepare_df(df: pd.DataFrame, split_name: str) -> pd.DataFrame:
+            # Rút trích đúng cột theo config và loại bỏ NA
+            df_filtered = df[[self.cfg.data.input_col, self.cfg.data.target_col]].dropna().reset_index(drop=True)
+            cleaned_df = self.processor.clean_original_pairs(df_filtered)
+            logger.debug(f"[{split_name}] size after cleaning: {len(cleaned_df):,}")
+            return cleaned_df
 
-        original_df = self.processor.clean_original_pairs(raw_df)
-        if len(original_df) == 0:
-            logger.error("Data cleaning resulted in an empty DataFrame!")
-            raise ValueError("No valid original samples after cleaning.")
+        # Bước 1: Làm sạch dữ liệu trên từng tập
+        train_orig_df = prepare_df(df_train, "Train")
+        valid_df = prepare_df(df_valid, "Valid")
+        test_df = prepare_df(df_test, "Test")
 
-        train_orig_df, valid_df, test_df = self.processor.split_dataframe(original_df)
-        logger.debug(f"Base splits - Train: {len(train_orig_df):,}, Valid: {len(valid_df):,}, Test: {len(test_df):,}")
+        if len(train_orig_df) == 0:
+            logger.error("Data cleaning resulted in an empty Train DataFrame!")
+            raise ValueError("No valid original samples after cleaning in train_df.")
 
+        # Bước 2: Data Augmentation (Tăng cường dữ liệu) chỉ trên tập Train
         parts = [train_orig_df]
         if self.cfg.augmentation.use_sentence_chunks:
             chunks_df = self.processor.build_sentence_chunks_from_targets(train_orig_df)
@@ -125,17 +131,20 @@ class DiacriticDataLoaderFactory:
         logger.info(f"  > Valid original  : {len(valid_df):,}")
         logger.info(f"  > Test original   : {len(test_df):,}")
 
+        # Bước 3: Khởi tạo Từ điển (Vocab)
         logger.info("Building CharVocab and WordVocab...")
         vocab_source_df = pd.concat([train_df, valid_df, test_df], ignore_index=True)
         char_vocab = build_vocab_from_words_file_and_dataframe(vocab_source_df, self.cfg)
         word_vocab = build_word_vocab(train_df, self.cfg)
         logger.info(f"Vocab built | CharVocab size: {len(char_vocab):,} | WordVocab size: {len(word_vocab):,}")
 
+        # Bước 4: Tạo PyTorch Dataset
         logger.info("Creating AccentContextDataset instances...")
         train_ds = AccentContextDataset(train_df, char_vocab, word_vocab, self.cfg)
         valid_ds = AccentContextDataset(valid_df, char_vocab, word_vocab, self.cfg)
         test_ds = AccentContextDataset(test_df, char_vocab, word_vocab, self.cfg)
 
+        # Bước 5: Tạo DataLoader
         logger.info("Constructing PyTorch DataLoaders...")
         train_loader = DataLoader(train_ds, batch_size=self.cfg.training.batch_size, shuffle=True, num_workers=0)
         valid_loader = DataLoader(valid_ds, batch_size=self.cfg.training.batch_size, shuffle=False, num_workers=0)

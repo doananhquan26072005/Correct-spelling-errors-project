@@ -6,7 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from diacritic_restoration.utils import apply_constraint_to_logits, compute_text_metrics
+from diacritic_restoration.utils import apply_constraint_to_logits
+from diacritic_restoration.metrics import compute_text_metrics
 from diacritic_restoration.vocab import CharVocab, WordVocab
 from common.logger import get_logger
 

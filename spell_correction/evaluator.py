@@ -1,9 +1,11 @@
+import os
 import time
 import numpy as np
 from typing import List, Dict, Set, Tuple
 from tqdm import tqdm
 
 from common.logger import get_logger
+from spell_correction.pipeline import extract_candidates_and_features
 
 logger = get_logger(__name__)
 
@@ -27,7 +29,7 @@ class Evaluator:
 
             if is_oov:
                 error_indices.add(i)
-                logger.debug(f"Token '{words[i]}' detected as absolute OOV error at index [{i}].")
+                # Đã gỡ bỏ logger.debug tránh spam I/O
                 
             valid_probs.append(prob)
             valid_indices.append(i)
@@ -54,7 +56,6 @@ class Evaluator:
                 
                 if is_anomaly or is_absolute_error:
                     error_indices.add(idx)
-                    logger.debug(f"Token '{words[idx]}' flagged as anomaly at index [{idx}] | Prob: {prob:.4f}")
 
         return sorted(list(error_indices))
 
@@ -65,7 +66,6 @@ class Evaluator:
         target_tokens = target_sentence.split()
         
         if len(input_tokens) != len(target_tokens):
-            logger.debug(f"Length mismatch during target alignment: Input ({len(input_tokens)}) vs Target ({len(target_tokens)})")
             return [], []
 
         error_indices = []
@@ -73,10 +73,8 @@ class Evaluator:
         for i in range(len(input_tokens)):
             if input_tokens[i] != target_tokens[i]:
                 if word_to_idx is not None and hasattr(word_to_idx, 'stoi') and target_tokens[i] not in word_to_idx.stoi:
-                    # Trường hợp dùng CharVocab của phần 1
                     continue
                 elif isinstance(word_to_idx, dict) and target_tokens[i] not in word_to_idx:
-                    # Trường hợp dùng dict thường của phần 2
                     continue
                 pairs.append((input_tokens[i], target_tokens[i]))
                 error_indices.append(i)
@@ -125,7 +123,6 @@ class Evaluator:
         elapsed = time.time() - start_time
         logger.info(f"Detection evaluation cycle finished in {elapsed:.2f} seconds.")
 
-        # Quy chuẩn in kết quả từ print cũ sang logger.info để bảo lưu nhật ký
         logger.info("==================== GIAI ĐOẠN PHÁT HIỆN LỖI (DETECTION) ====================")
         logger.info(f" • Số lỗi thực tế (Actual Target) : {total_TP + total_FN:,}")
         logger.info(f" • Số lỗi dự đoán (Model Predict) : {total_TP + total_FP:,}")
@@ -139,7 +136,7 @@ class Evaluator:
 
         return {"precision": precision, "recall": recall, "f05": f05_score}
 
-    def evaluate_ranking_performance(self, validation_df, abbr_engine, extractor_engine, generator, ranker):
+    def evaluate_ranking_performance(self, validation_df, abbr_engine, extractor_engine, generator, ranker, stopwords):
         """Quét qua tập validation để đánh giá khả năng sắp xếp ứng viên của LightGBM Ranker."""
         logger.info("Executing LightGBM Ranker Performance Sweep (MRR / Hit@K)...")
         start_time = time.time()
@@ -176,20 +173,16 @@ class Evaluator:
                     correct_word.isdigit()):
                     continue
 
-                if self.config and hasattr(self.config, 'candidate_generation'):
-                    k_candidates = self.config.candidate_generation.top_k_raw
-                else:
-                    k_candidates = 2
-
-                raw_candidates = generator.lookup(error_word, extractor_engine.word_to_idx, k=k_candidates)
-                if not raw_candidates:
-                    count_error_all += 1 
-                    continue
-
-                candidates_with_features = extractor_engine.extract_candidates_and_features(
-                    error_word=error_word, sentence_words=input_tokens,
-                    error_idx=actual_error_idx, error_indices=error_detect,
-                    candidates=raw_candidates, model_lm=self.model_lm, generator=generator
+                # ĐÃ CẬP NHẬT: Sử dụng hàm điều phối độc lập mới
+                candidates_with_features = extract_candidates_and_features(
+                    error_word=error_word,
+                    sentence_words=input_tokens,
+                    error_idx=actual_error_idx,
+                    error_indices=error_detect,
+                    generator=generator,
+                    extractor=extractor_engine,
+                    stopwords=stopwords,
+                    cfg=self.config
                 )
 
                 if not candidates_with_features:
@@ -213,8 +206,6 @@ class Evaluator:
                     if rank <= 5: hit_at_5 += 1
                         
                 except ValueError:
-                    # Ghi nhận log debug khi từ chính xác hoàn toàn trượt khỏi top ứng viên thô
-                    logger.debug(f"Recall Failure: Correct word '{correct_word}' was not captured in candidates for typo '{error_word}'.")
                     pass 
 
         total_eval = max(1, count_error_all)
@@ -239,7 +230,7 @@ class Evaluator:
 
         return metrics
 
-    def evaluate_word_accuracy(self, validation_df, abbr_engine, pipeline_correct_fn, word_to_idx):
+    def evaluate_word_accuracy(self, validation_df, abbr_engine, pipeline_correct_fn, stopwords, word_to_idx):
         """Đánh giá độ chính xác cấp độ từ (Word Accuracy) của các từ sai được sửa."""
         logger.info("Evaluating Pipeline Word Accuracy metrics...")
         count_error = 0
@@ -250,12 +241,11 @@ class Evaluator:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            input_sent = abbr_engine.replace_abbreviations(input_sent)
             error_pairs, error_indices = self.find_misspelled_words_and_targets(input_sent, target_sent, word_to_idx)
             if not error_pairs:
                 continue 
 
-            fixed_sentence_str = pipeline_correct_fn(input_sent)
+            fixed_sentence_str = pipeline_correct_fn(input_sent, stopwords)
             
             fixed_tokens = fixed_sentence_str.split()
             input_tokens = input_sent.split()
@@ -291,7 +281,7 @@ class Evaluator:
 
         return {"word_accuracy": accuracy, "total_processed_errors": count_error}
 
-    def evaluate_end_to_end(self, validation_df, abbr_engine, pipeline_correct_fn):
+    def evaluate_end_to_end(self, validation_df, abbr_engine, pipeline_correct_fn, stopwords):
         """Đánh giá hiệu năng toàn cục End-to-End của hệ thống sửa lỗi chính tả."""
         logger.info("Launching final End-to-End system validation sweep...")
         
@@ -305,7 +295,7 @@ class Evaluator:
             target_sent = str(row['target'])
 
             input_sent = abbr_engine.replace_abbreviations(input_sent)
-            fixed_sentence_str = pipeline_correct_fn(input_sent)
+            fixed_sentence_str = pipeline_correct_fn(input_sent, stopwords)
             
             target_tokens = target_sent.split()
             fixed_tokens = fixed_sentence_str.split()
@@ -339,5 +329,3 @@ class Evaluator:
             "total_word_errors": total_word_errors,
             "total_reference_words": total_reference_words
         }
-
-
