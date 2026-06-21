@@ -1,15 +1,11 @@
 import json
 import os
 import re
-import time
-import gdown
 import numpy as np
 import torch
-import torch.nn as nn
-from datasets import DatasetDict
 
 from common.logger import get_logger
-from spell_correction.models import SkipGram
+from spell_correction.skipgram_trainer import SkipGram
 
 logger = get_logger(__name__)
 
@@ -18,16 +14,6 @@ class ResourceLoader:
     def __init__(self, cfg):
         self.cfg = cfg
         logger.info("ResourceLoader initialized.")
-
-    def _download_from_gdrive(self, file_id, output_path):
-        logger.info(f"File NOT found locally at {output_path}. Initiating download from Google Drive...")
-        try:
-            url = f'https://drive.google.com/uc?id={file_id}'
-            gdown.download(url, output_path, quiet=True)
-            logger.info(f"Successfully downloaded and saved asset to: {output_path}")
-        except Exception as e:
-            logger.error(f"Failed to download asset from Google Drive ID: {file_id}", exc_info=True)
-            raise e
 
     def load_vocab_and_dicts(self):
         logger.info("ResourceLoader: Loading dictionaries and telex configurations...")
@@ -65,51 +51,6 @@ class ResourceLoader:
         except json.JSONDecodeError as e:
             logger.error(f"Telex mapping file contains malformed JSON structure.", exc_info=True)
             raise e
-
-    def create_norm_embedding_matrix(self, vocab_size):
-        model_path = self.cfg.paths.skipgram_model_file
-        device = self.cfg.DEVICE
-
-        if not os.path.exists(model_path):
-            gdrive_id = getattr(self.cfg.paths, "skipgram_gdrive_id", None)
-            if not gdrive_id:
-                logger.error(f"Local file {model_path} missing and 'skipgram_gdrive_id' undefined in config.")
-                raise ValueError(f"Không thấy file {model_path} cục bộ và thiếu 'skipgram_gdrive_id' trong config!")
-            self._download_from_gdrive(gdrive_id, model_path)
-
-        logger.info(f"ResourceLoader: Initializing SkipGram model architecture onto device: {device}")
-        
-        try:
-            embed_dim = self.cfg.model.embed_dim if hasattr(self.cfg, 'model') else 128
-            
-            model_skipgram = SkipGram(vocab_size, embed_dim).to(device)
-            model_skipgram.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
-            logger.info(f"Successfully loaded SkipGram weights checkpoint from: {model_path}")
-            
-            embeddings = model_skipgram.embedding.weight.data
-            embedding_matrix = embeddings.cpu().numpy()
-
-            logger.info("ResourceLoader: Computing L2-normalization for Embedding Matrix...")
-            norms = np.linalg.norm(embedding_matrix, axis=1, keepdims=True)
-            norms[norms == 0] = 1
-            norm_embedding_matrix = embedding_matrix / norms
-            
-            logger.debug(f"Normalized Embedding Matrix shape: {norm_embedding_matrix.shape}")
-            return norm_embedding_matrix
-
-        except Exception as e:
-            logger.error("Failed to extract or normalize the Embedding matrix from SkipGram model.", exc_info=True)
-            raise e
-
-    def load_all(self):
-        """Hàm điều phối: Load dicts trước -> lấy Vocab Size -> Khởi tạo Matrix sau."""
-        logger.info("=== STARTING FULL RESOURCE DEPLOYMENT LOOP ===")
-        resources = self.load_vocab_and_dicts()
-        vocab_size = len(resources["vocab"])
-        
-        resources["norm_embedding_matrix"] = self.create_norm_embedding_matrix(vocab_size)
-        logger.info("=== RESOURCE DEPLOYMENT LOOP COMPLETED ===")
-        return resources
 
 
 def process_dataset(examples, word_to_idx):

@@ -1,4 +1,3 @@
-# project/diacritic_restoration/__init__.py
 from diacritic_restoration.vocab import CharVocab, WordVocab, build_allowed_token_mask, encode_word_ids_per_char, build_word_vocab, build_vocab_from_words_file_and_dataframe, build_allowed_token_mask
 from diacritic_restoration.dataset import AccentContextDataset, DiacriticDataLoaderFactory
 from diacritic_restoration.model import PositionalEncoding, ContextAwareAccentTagger, build_model

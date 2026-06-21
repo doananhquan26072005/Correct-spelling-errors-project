@@ -1,24 +1,33 @@
-# -*- coding: utf-8 -*-
 import os
-import re
-import time
-import warnings
-from typing import Dict, List, Set, Tuple
-import lightgbm as lgb
+from typing import List, Dict, Set
 import numpy as np
 import pandas as pd
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import tqdm
 from torch.utils.data import DataLoader, TensorDataset
-from tqdm import tqdm
 
 from common.logger import get_logger
-from spell_correction.models import SkipGram
 
 logger = get_logger(__name__)
 
+class SkipGram(nn.Module):
 
+    def __init__(self, vocab_size, embed_dim):
+        super().__init__()
+
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.linear = nn.Linear(embed_dim, vocab_size)
+
+    def forward(self, x):
+
+        embed = self.embedding(x)
+        out = self.linear(embed)
+
+        return out
+    
 class SkipGramTrainer:
     """Class chịu trách nhiệm quản lý toàn bộ vòng đời của mô hình Word Embedding Skip-gram:
     Từ tiền xử lý dữ liệu, tạo cặp Center-Context, huấn luyện, đến trích xuất ma trận chuẩn hóa."""
@@ -211,110 +220,33 @@ class SkipGramTrainer:
             count += 1
             if count >= top_k:
                 break
-
-
-class LightGBMRankerTrainer:
-    """Class quản lý toàn bộ vòng đời cấu hình, huấn luyện và đóng gói 
-    mô hình xếp hạng ứng viên (LightGBM LambdaRanker)."""
     
-    def __init__(self, cfg):
-        self.cfg = cfg
-        self.ranker = None
-        warnings.filterwarnings("ignore", category=UserWarning)
-        logger.info("LightGBMRankerTrainer initialized.")
-
-    def load_training_data(self, data_path: str) -> tuple:
-        """Đọc tập dữ liệu trích xuất đặc trưng (.npz) được chuẩn bị sẵn."""
-        if not os.path.exists(data_path):
-            logger.error(f"Feature dataset not discovered at path target: {data_path}")
-            raise FileNotFoundError(f"❌ Không tìm thấy tệp dữ liệu huấn luyện tại: {data_path}")
-            
-        logger.info(f"Loading engineered feature matrix files from: {data_path}")
-        loaded_data = np.load(data_path)
-        X_train = loaded_data['X_train']
-        y_train = loaded_data['y_train']
-        group_train = loaded_data['group_train']
+    def load_model(self, model_path: str):
+        """Tải lại trọng số mô hình và ma trận embedding đã nén từ ổ cứng."""
+        matrix_path = model_path.replace(".pth", "_matrix.npz")
         
-        logger.info(f"Data matrices successfully loaded | X_train shape: {X_train.shape} | Total Query Groups: {len(group_train):,}")
-        return X_train, y_train, group_train
+        if not os.path.exists(matrix_path):
+            logger.error(f"Compressed matrix file not found at: {matrix_path}")
+            raise FileNotFoundError(f"❌ Không tìm thấy file ma trận nén tại: {matrix_path}")
 
-    def train(self, X_train: np.ndarray, y_train: np.ndarray, group_train: np.ndarray) -> lgb.LGBMRanker:
-        """Khởi tạo cấu hình và kích hoạt chu trình huấn luyện mô hình Ranker."""
-        logger.info("Configuring LightGBM LambdaRanker core specifications...")
+        logger.info(f"Loading pre-trained embedding matrices from: {matrix_path}")
+        loaded_data = np.load(matrix_path)
         
-        if self.cfg and hasattr(self.cfg, 'ranker_training'):
-            r_train = self.cfg.ranker_training
-            lr = r_train.learning_rate
-            num_leaves = r_train.num_leaves
-            min_child_samples = r_train.min_child_samples
-            random_state = r_train.random_state
-            eval_at = r_train.eval_at
-        else:
-            lr = 0.05
-            num_leaves = 31
-            min_child_samples = 20
-            random_state = 42
-            eval_at = [1, 3, 5]
-
-        self.ranker = lgb.LGBMRanker(
-            objective='lambdarank',
-            metric='ndcg',
-            eval_at=eval_at,
-            label_gain=[0, 1],
-            learning_rate=lr,
-            num_leaves=num_leaves,
-            min_child_samples=min_child_samples,
-            random_state=random_state
-        )
-
-        logger.info("Fitting LightGBMRanker on feature datasets...")
-        start_time = time.time()
-        self.ranker.fit(
-            X=X_train,
-            y=y_train,
-            group=group_train
-        )
-        logger.info(f"LightGBM ranking estimator optimization completed in {time.time() - start_time:.2f}s.")
-        self._log_feature_importances()
-        return self.ranker
-
-    def _log_feature_importances(self):
-        """Phương thức nội bộ: Thống kê và hiển thị mức độ đóng góp của từng đặc trưng."""
-        if self.ranker is None:
-            return
-            
-        feature_names = [
-            'ken_score', 'word2vec_sim', 'unigram_count', 
-            'bigram_count', 'trigram_count', 'edit_dist', 'length_ratio'
-        ]
+        self.embedding_weights = loaded_data['embedding_matrix']
+        self.norm_embedding_matrix = loaded_data['norm_embedding_matrix']
         
-        logger.info("==================== FEATURE IMPORTANCE STATISTICS ====================")
-        for name, importance in zip(feature_names, self.ranker.feature_importances_):
-            logger.info(f"  • {name:<15}: {importance}")
-        logger.info("=======================================================================")
+        # Cập nhật lại vocab nếu vocab từ config và file npz có sự sai lệch
+        loaded_vocab = loaded_data['vocab'].tolist()
+        if len(self.vocab) != len(loaded_vocab):
+            logger.warning("Kích thước vocab hiện tại khác với vocab trong file model. Đang ghi đè bằng vocab của model.")
+            self.vocab = loaded_vocab
+            self.word_to_idx = {word: i for i, word in enumerate(self.vocab)}
 
-    def save_model(self, model_path: str):
-        """Lưu trữ mô hình đã huấn luyện ra file text của LightGBM."""
-        if self.ranker is None:
-            logger.error("Ranker estimator has no optimized parameter trees. Aborting.")
-            raise ValueError("❌ Mô hình chưa được huấn luyện. Không thể lưu checkpoint.")
-        
-        output_dir = os.path.dirname(model_path)
-        if output_dir and not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
+        logger.info(f"Successfully loaded L2 normalized embedding matrix with shape: {self.norm_embedding_matrix.shape}")
 
-        self.ranker.booster_.save_model(model_path)
-        logger.info(f"LightGBM ranker booster model trees secured text-file format at: {model_path}")
-
-    def load_model(self, model_path: str) -> lgb.LGBMRanker:
-        """Tải mô hình từ checkpoint có sẵn để phục vụ cho Inference/Evaluation nhanh."""
-        if not os.path.exists(model_path):
-            logger.error(f"LightGBM configuration text file not found at: {model_path}")
-            raise FileNotFoundError(f"❌ Không tìm thấy checkpoint mô hình tại: {model_path}")
-            
-        logger.info(f"Loading pre-compiled LightGBM ranker assets from: {model_path}")
-        bst = lgb.Booster(model_file=model_path)
-        self.ranker = lgb.LGBMRanker()
-        self.ranker.booster_ = bst
-        logger.info("LightGBM ranker components re-activated successfully.")
-        return self.ranker
+    def get_norm_embedding(self) -> np.ndarray:
+        """Phương thức getter để trích xuất ma trận chuẩn hóa truyền cho các module khác."""
+        if self.norm_embedding_matrix is None:
+            logger.error("norm_embedding_matrix is None. Please train or load the model first.")
+            raise ValueError("❌ Ma trận chuẩn hóa chưa được nạp. Hãy gọi train() hoặc load_model() trước.")
+        return self.norm_embedding_matrix

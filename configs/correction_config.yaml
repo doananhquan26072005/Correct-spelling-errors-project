@@ -6,6 +6,7 @@ paths:
   teen_code_file: "data/external/teen_code.txt"
   trigram_lm_file: "trigram.bin"
   skipgram_model_file: "model_skipgram.pth"
+  skipgram_model_path: "test_model.pth"
   lightgbm_data_path: "dataset_spell_correction.npz"
 
 model:

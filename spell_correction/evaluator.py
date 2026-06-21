@@ -1,36 +1,11 @@
-import re
 import time
 import numpy as np
-import pandas as pd
 from typing import List, Dict, Set, Tuple
 from tqdm import tqdm
 
 from common.logger import get_logger
 
 logger = get_logger(__name__)
-
-class HeuristicScorer:
-    """Chuyên trách việc tính toán điểm Heuristic tổng hợp dựa trên cấu hình trọng số."""
-    def __init__(self, cfg=None):
-        self.cfg = cfg
-        logger.info("HeuristicScorer engine online.")
-
-    def compute_score(self, norm_ken: float, norm_edit: float, length_ratio: float, 
-                      norm_c1: float, norm_c2: float, norm_c3: float, norm_sim: float) -> float:
-        w = self.cfg.feature_weights if self.cfg else None
-        if w:
-            return (
-                (w.w_kenlm * norm_ken) +
-                (w.w_edit * norm_edit) +
-                (w.w_len * length_ratio) +
-                (w.w_bigram * norm_c2) +
-                (w.w_trigram * norm_c3) +
-                (w.w_unigram * norm_c1) +
-                (w.w_sim * norm_sim)
-            )
-        else:
-            return (0.30 * norm_ken) + (0.25 * norm_edit) + (0.10 * length_ratio) + (0.20 * norm_c2)
-
 
 class Evaluator:
     def __init__(self, model_lm, config=None):
@@ -114,7 +89,7 @@ class Evaluator:
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
         return (1 + 0.5**2) * (precision * recall) / ((0.5**2 * precision) + recall) if (precision + recall) > 0 else 0
     
-    def evaluate_error_detection(self, validation_df, teencode_engine):
+    def evaluate_error_detection(self, validation_df, abbr_engine):
         """Quét qua tập dữ liệu validation để đánh giá độ chính xác giai đoạn phát hiện lỗi (Detect)."""
         logger.info("Executing Error Detection Performance Sweep...")
         start_time = time.time()
@@ -128,7 +103,7 @@ class Evaluator:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            input_sent = teencode_engine.replace_abbreviations(input_sent)
+            input_sent = abbr_engine.replace_abbreviations(input_sent)
             _, error_indices = self.find_misspelled_words_and_targets(input_sent, target_sent, None)
 
             if not error_indices:
@@ -164,7 +139,7 @@ class Evaluator:
 
         return {"precision": precision, "recall": recall, "f05": f05_score}
 
-    def evaluate_ranking_performance(self, validation_df, teencode_engine, extractor_engine, generator, ranker):
+    def evaluate_ranking_performance(self, validation_df, abbr_engine, extractor_engine, generator, ranker):
         """Quét qua tập validation để đánh giá khả năng sắp xếp ứng viên của LightGBM Ranker."""
         logger.info("Executing LightGBM Ranker Performance Sweep (MRR / Hit@K)...")
         start_time = time.time()
@@ -180,7 +155,7 @@ class Evaluator:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            input_sent = teencode_engine.replace_abbreviations(input_sent)
+            input_sent = abbr_engine.replace_abbreviations(input_sent)
             input_tokens = input_sent.split()
             target_tokens = target_sent.split()
 
@@ -264,7 +239,7 @@ class Evaluator:
 
         return metrics
 
-    def evaluate_word_accuracy(self, validation_df, teencode_engine, pipeline_correct_fn, word_to_idx):
+    def evaluate_word_accuracy(self, validation_df, abbr_engine, pipeline_correct_fn, word_to_idx):
         """Đánh giá độ chính xác cấp độ từ (Word Accuracy) của các từ sai được sửa."""
         logger.info("Evaluating Pipeline Word Accuracy metrics...")
         count_error = 0
@@ -275,7 +250,7 @@ class Evaluator:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            input_sent = teencode_engine.replace_abbreviations(input_sent)
+            input_sent = abbr_engine.replace_abbreviations(input_sent)
             error_pairs, error_indices = self.find_misspelled_words_and_targets(input_sent, target_sent, word_to_idx)
             if not error_pairs:
                 continue 
@@ -316,7 +291,7 @@ class Evaluator:
 
         return {"word_accuracy": accuracy, "total_processed_errors": count_error}
 
-    def evaluate_end_to_end(self, validation_df, teencode_engine, pipeline_correct_fn):
+    def evaluate_end_to_end(self, validation_df, abbr_engine, pipeline_correct_fn):
         """Đánh giá hiệu năng toàn cục End-to-End của hệ thống sửa lỗi chính tả."""
         logger.info("Launching final End-to-End system validation sweep...")
         
@@ -329,7 +304,7 @@ class Evaluator:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            input_sent = teencode_engine.replace_abbreviations(input_sent)
+            input_sent = abbr_engine.replace_abbreviations(input_sent)
             fixed_sentence_str = pipeline_correct_fn(input_sent)
             
             target_tokens = target_sent.split()
@@ -366,53 +341,3 @@ class Evaluator:
         }
 
 
-class Visualizer:
-    def __init__(self, pipeline, teencode_engine, evaluator, word_to_idx):
-        """Class hỗ trợ phân loại và đánh giá trực quan kết quả sửa lỗi của hệ thống."""
-        self.pipeline = pipeline
-        self.teencode_engine = teencode_engine
-        self.evaluator = evaluator
-        self.word_to_idx = word_to_idx
-        logger.info("Visualizer module online for qualitative output sampling.")
-
-    def analyze_predictions(self, validation_df, num_samples=200):
-        """Quét qua tập dữ liệu kiểm thử, chạy pipeline và phân loại câu/từ."""
-        logger.info(f"Sampling {num_samples} validation queries for visual performance breakdown...")
-        
-        exact_sentences = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
-        error_sentence = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
-        error_words = pd.DataFrame(columns=['Error', 'Correct'])
-
-        target_df = validation_df.head(num_samples)
-
-        pbar = tqdm(target_df.iterrows(), total=len(target_df), desc="Analyzing Sample Predictions", leave=False)
-        for _, row in pbar: 
-            input_sent = str(row['input'])
-            target_sent = str(row['target'])
-
-            cleaned_input = self.teencode_engine.replace_abbreviations(input_sent)
-            _, error_indices = self.evaluator.find_misspelled_words_and_targets(cleaned_input, target_sent, self.word_to_idx)
-
-            fixed_sentence_str = self.pipeline.correct_sentence(cleaned_input)
-
-            target_tokens = target_sent.split()
-            fixed_tokens = fixed_sentence_str.split()
-
-            if len(target_tokens) != len(fixed_tokens):
-                logger.debug(f"Visualizer down-dropped uneven structural split sentence: {input_sent}")
-                continue
-
-            errors_in_sentence = 0
-            for idx in error_indices:
-                if fixed_tokens[idx] != target_tokens[idx]:
-                    errors_in_sentence += 1
-                    error_words.loc[error_words.shape[0]] = [fixed_tokens[idx], target_tokens[idx]]
-
-            if errors_in_sentence == 0 and not error_indices:
-                exact_sentences.loc[exact_sentences.shape[0]] = [input_sent, fixed_sentence_str, target_sent]
-            
-            if errors_in_sentence != 0:
-                error_sentence.loc[error_sentence.shape[0]] = [input_sent, fixed_sentence_str, target_sent]
-
-        logger.info(f"Visualization evaluation completed | Exact sentences: {len(exact_sentences)} | Sentences with errors: {len(error_sentence)}")
-        return exact_sentences, error_sentence, error_words
