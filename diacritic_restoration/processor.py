@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple
 import pandas as pd
 import torch
 
-from diacritic_restoration.models import ContextAwareAccentTagger
+from diacritic_restoration.model import ContextAwareAccentTagger
 from diacritic_restoration.utils import apply_constraint_to_logits, normalize_text, remove_accents_text
 from diacritic_restoration.vocab import CharVocab, WordVocab, build_allowed_token_mask, encode_word_ids_per_char
 from common.logger import get_logger

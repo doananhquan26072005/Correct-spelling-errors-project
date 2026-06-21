@@ -1,26 +1,24 @@
-# spell_correction/trainer.py
+# -*- coding: utf-8 -*-
 import os
-import json
 import re
+import time
+import warnings
+from typing import Dict, List, Set, Tuple
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
-from typing import List, Dict, Set, Tuple
+from torch.utils.data import DataLoader, TensorDataset
+from tqdm import tqdm
 
-class SkipGram(nn.Module):
-    def __init__(self, vocab_size: int, embed_dim: int):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.linear = nn.Linear(embed_dim, vocab_size)
+from common.logger import get_logger
+from spell_correction.models import SkipGram
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        embed = self.embedding(x)
-        out = self.linear(embed)
-        return out
-    
+logger = get_logger(__name__)
+
+
 class SkipGramTrainer:
     """Class chịu trách nhiệm quản lý toàn bộ vòng đời của mô hình Word Embedding Skip-gram:
     Từ tiền xử lý dữ liệu, tạo cặp Center-Context, huấn luyện, đến trích xuất ma trận chuẩn hóa."""
@@ -36,18 +34,21 @@ class SkipGramTrainer:
         self.embedding_weights: np.ndarray = None
         self.norm_embedding_matrix: np.ndarray = None
         
+        logger.info("Initializing SkipGramTrainer...")
         # Tải tài nguyên ngay khi khởi tạo
         self._load_resources()
 
     def _load_resources(self):
         """Phương thức nội bộ: Nạp từ điển Vocab và Stopwords từ đường dẫn cấu hình."""
-        print("[*] Loading Vocab and Stopwords resources...")
         vocab_path = self.cfg.paths.vocab_file
         stopwords_path = self.cfg.paths.stopwords_file
 
+        logger.info(f"Loading external dictionary components | Vocab: {vocab_path} | Stopwords: {stopwords_path}")
         if not os.path.exists(vocab_path):
+            logger.error(f"Vocabulary file missing at path: {vocab_path}")
             raise FileNotFoundError(f"Không tìm thấy file vocab tại: {vocab_path}")
         if not os.path.exists(stopwords_path):
+            logger.error(f"Stopwords file missing at path: {stopwords_path}")
             raise FileNotFoundError(f"Không tìm thấy file stopwords tại: {stopwords_path}")
 
         with open(vocab_path, 'r', encoding='utf-8') as f:
@@ -58,19 +59,15 @@ class SkipGramTrainer:
         with open(stopwords_path, 'r', encoding='utf-8') as f:
             self.stopword = set(f.read().splitlines())
             
-        print(f"  • Kích thước từ vựng (Vocab Size): {len(self.vocab):,}")
+        logger.info(f"Resources loaded successfully. Unique Vocab Size: {len(self.vocab):,}")
 
     def build_dataset(self, target_sentences: pd.Series) -> DataLoader:
         """Xử lý thô văn bản đích và chuyển đổi thành DataLoader chứa các cặp Center-Context."""
         window_size = self.cfg.model.window_size
+        batch_size = self.cfg.skipgram_training.batch_size if (self.cfg and hasattr(self.cfg, 'skipgram_training')) else 512
         
-        # Đọc động thông số batch_size từ nhánh skipgram_training trong config
-        if self.cfg and hasattr(self.cfg, 'skipgram_training'):
-            batch_size = self.cfg.skipgram_training.batch_size
-        else:
-            batch_size = 512
-        
-        print(f"[*] Đang sinh các cặp Center - Context (Window Size = {window_size})...")
+        logger.info(f"Generating Center-Context word training pairs (Window Size: {window_size}, Batch Size: {batch_size})...")
+        start_time = time.time()
         skipgram_data = []
 
         for sentence in target_sentences:
@@ -93,7 +90,8 @@ class SkipGramTrainer:
                         context = self.word_to_idx[context_word]
                         skipgram_data.append((center, context))
 
-        print(f"  • Tổng số lượng cặp Skip-gram tạo ra: {len(skipgram_data):,}")
+        elapsed = time.time() - start_time
+        logger.info(f"Dataset generated in {elapsed:.2f}s | Total generated training instances: {len(skipgram_data):,}")
         
         centers = torch.LongTensor([pair[0] for pair in skipgram_data])
         contexts = torch.LongTensor([pair[1] for pair in skipgram_data])
@@ -106,7 +104,6 @@ class SkipGramTrainer:
         vocab_size = len(self.vocab)
         embed_dim = self.cfg.model.embed_dim
         
-        # Đọc động thông số chu kỳ học và lr từ cấu hình
         if self.cfg and hasattr(self.cfg, 'skipgram_training'):
             epochs = self.cfg.skipgram_training.epochs
             lr = self.cfg.skipgram_training.learning_rate
@@ -115,17 +112,19 @@ class SkipGramTrainer:
             lr = 0.001
 
         self.model = SkipGram(vocab_size, embed_dim).to(self.device)
-        
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(self.model.parameters(), lr=lr)
         
-        print(f"[*] Kích hoạt huấn luyện Skip-gram trên {self.device} trong {epochs} Epochs...")
+        logger.info(f"Activating Skip-gram optimization on hardware: {self.device.upper()} | Total Epochs: {epochs}")
+        total_start_time = time.time()
         self.model.train()
 
-        for epoch in range(epochs):
+        for epoch in range(1, epochs + 1):
+            epoch_start_time = time.time()
             total_loss = 0.0
 
-            for batch_centers, batch_contexts in loader:
+            pbar = tqdm(loader, desc=f"Epoch {epoch:02d}/{epochs} [SkipGram]", leave=False)
+            for batch_centers, batch_contexts in pbar:
                 batch_centers = batch_centers.to(self.device)
                 batch_contexts = batch_contexts.to(self.device)
 
@@ -137,14 +136,19 @@ class SkipGramTrainer:
                 optimizer.step()
 
                 total_loss += loss.item()
+                pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-            print(f"  • Epoch {epoch+1:02d}/{epochs} -> Total Loss: {total_loss:.4f}")
+            epoch_elapsed = time.time() - epoch_start_time
+            avg_loss = total_loss / len(loader)
+            logger.info(f"Epoch {epoch:02d}/{epochs} finished | Avg Loss: {avg_loss:.4f} | Time: {epoch_elapsed:.1f}s")
             
-        print("[+] Quá trình huấn luyện mạng nơ-ron hoàn tất!")
+        total_train_time = time.time() - total_start_time
+        logger.info(f"Neural network optimization finished. Total optimization time: {total_train_time:.2f}s")
         self._extract_and_normalize_embeddings()
 
     def _extract_and_normalize_embeddings(self):
         """Phương thức nội bộ: Rút trích và thực hiện chuẩn hóa L2 cho ma trận vector từ."""
+        logger.info("Extracting raw embedding matrices and calculating L2 normalizations...")
         self.model.eval()
         with torch.no_grad():
             self.embedding_weights = self.model.embedding.weight.data.cpu().numpy()
@@ -152,10 +156,12 @@ class SkipGramTrainer:
         norms = np.linalg.norm(self.embedding_weights, axis=1, keepdims=True)
         norms[norms == 0] = 1.0  
         self.norm_embedding_matrix = self.embedding_weights / norms
+        logger.info(f"L2 Normalization matrix secured with structural shape: {self.norm_embedding_matrix.shape}")
 
     def save_model(self, output_path: str):
         """Lưu trữ checkpoint mô hình PyTorch và ma trận nén Numpy."""
         if self.model is None:
+            logger.error("Model has not been optimized yet. Aborting serialization.")
             raise ValueError("Mô hình chưa được huấn luyện. Không thể lưu trữ.")
 
         output_dir = os.path.dirname(output_path)
@@ -169,7 +175,7 @@ class SkipGramTrainer:
             "word_to_idx": self.word_to_idx
         }
         torch.save(checkpoint, output_path)
-        print(f"[+] Đã lưu checkpoint State Dict tại: {output_path}")
+        logger.info(f"PyTorch model checkpoint weight dict safely stored at: {output_path}")
 
         matrix_path = output_path.replace(".pth", "_matrix.npz")
         np.savez_compressed(
@@ -178,15 +184,15 @@ class SkipGramTrainer:
             norm_embedding_matrix=self.norm_embedding_matrix,
             vocab=np.array(self.vocab)
         )
-        print(f"[+] Đã lưu ma trận nén Embedding tại: {matrix_path}")
+        logger.info(f"Compressed compressed embedding numpy matrix blocks secured at: {matrix_path}")
 
     def sanity_check(self, target_word: str, top_k: int = 5):
         """Kiểm tra nhanh chất lượng không gian vector ngữ nghĩa dựa trên Cosine Similarity."""
         if self.norm_embedding_matrix is None:
-            print("⚠️ Chưa có ma trận embedding để kiểm tra.")
+            logger.warning("No normalized matrix structures found. Execution dropped.")
             return
         if target_word not in self.word_to_idx:
-            print(f"⚠️ Từ '{target_word}' không tồn tại trong từ điển (OOV).")
+            logger.warning(f"Target verification token '{target_word}' is out of vocabulary (OOV).")
             return
 
         word_idx = self.word_to_idx[target_word]
@@ -195,23 +201,17 @@ class SkipGramTrainer:
         scores = np.dot(self.norm_embedding_matrix, word_vector)
         top_indices = np.argsort(scores)[::-1][:top_k + 1]
         
-        print(f"\n[Thử nghiệm ngữ nghĩa] Top {top_k} từ gần nhất với '{target_word}':")
+        logger.info(f"Qualitative Vector Space Sanity Check for token: '{target_word}'")
         count = 0
         for idx in top_indices:
             sim_word = self.vocab[idx]
             if sim_word == target_word:
                 continue
-            print(f"  • {sim_word:<15} -> Cosine Score: {scores[idx]:.4f}")
+            logger.info(f"  -> NearNeighbor: {sim_word:<15} | Cosine Similarity Score: {scores[idx]:.4f}")
             count += 1
             if count >= top_k:
                 break
 
-# trainer.py
-import os
-import warnings
-import numpy as np
-import lightgbm as lgb
-from typing import Dict, Any
 
 class LightGBMRankerTrainer:
     """Class quản lý toàn bộ vòng đời cấu hình, huấn luyện và đóng gói 
@@ -221,27 +221,27 @@ class LightGBMRankerTrainer:
         self.cfg = cfg
         self.ranker = None
         warnings.filterwarnings("ignore", category=UserWarning)
+        logger.info("LightGBMRankerTrainer initialized.")
 
     def load_training_data(self, data_path: str) -> tuple:
         """Đọc tập dữ liệu trích xuất đặc trưng (.npz) được chuẩn bị sẵn."""
         if not os.path.exists(data_path):
+            logger.error(f"Feature dataset not discovered at path target: {data_path}")
             raise FileNotFoundError(f"❌ Không tìm thấy tệp dữ liệu huấn luyện tại: {data_path}")
             
-        print(f"[*] Đang nạp dữ liệu từ {data_path}...")
+        logger.info(f"Loading engineered feature matrix files from: {data_path}")
         loaded_data = np.load(data_path)
         X_train = loaded_data['X_train']
         y_train = loaded_data['y_train']
         group_train = loaded_data['group_train']
         
-        print(f"  • X_train shape: {X_train.shape}")
-        print(f"  • Số lượng nhóm (queries): {len(group_train):,}")
+        logger.info(f"Data matrices successfully loaded | X_train shape: {X_train.shape} | Total Query Groups: {len(group_train):,}")
         return X_train, y_train, group_train
 
     def train(self, X_train: np.ndarray, y_train: np.ndarray, group_train: np.ndarray) -> lgb.LGBMRanker:
         """Khởi tạo cấu hình và kích hoạt chu trình huấn luyện mô hình Ranker."""
-        print("[*] Khởi tạo mô hình LGBMRanker (lambdarank)...")
+        logger.info("Configuring LightGBM LambdaRanker core specifications...")
         
-        # Đọc động toàn bộ siêu tham số của mô hình cây phân hạng từ ranker_training trong config
         if self.cfg and hasattr(self.cfg, 'ranker_training'):
             r_train = self.cfg.ranker_training
             lr = r_train.learning_rate
@@ -267,13 +267,14 @@ class LightGBMRankerTrainer:
             random_state=random_state
         )
 
-        print("[*] Đang fit mô hình trên tập dữ liệu đặc trưng...")
+        logger.info("Fitting LightGBMRanker on feature datasets...")
+        start_time = time.time()
         self.ranker.fit(
             X=X_train,
             y=y_train,
             group=group_train
         )
-        print("[+] Huấn luyện LightGBM Ranker hoàn tất thành công!")
+        logger.info(f"LightGBM ranking estimator optimization completed in {time.time() - start_time:.2f}s.")
         self._log_feature_importances()
         return self.ranker
 
@@ -287,14 +288,15 @@ class LightGBMRankerTrainer:
             'bigram_count', 'trigram_count', 'edit_dist', 'length_ratio'
         ]
         
-        print("\n" + "-"*15 + " ĐÓNG GÓP CỦA CÁC ĐẶC TRƯNG (FEATURE IMPORTANCE) " + "-"*15)
+        logger.info("==================== FEATURE IMPORTANCE STATISTICS ====================")
         for name, importance in zip(feature_names, self.ranker.feature_importances_):
-            print(f"  • {name:<15}: {importance}")
-        print("-" * 76 + "\n")
+            logger.info(f"  • {name:<15}: {importance}")
+        logger.info("=======================================================================")
 
     def save_model(self, model_path: str):
-        """Lưu trữ mô hình đã huấn luyện ra file text của LightGBM hoặc checkpoint binary."""
+        """Lưu trữ mô hình đã huấn luyện ra file text của LightGBM."""
         if self.ranker is None:
+            logger.error("Ranker estimator has no optimized parameter trees. Aborting.")
             raise ValueError("❌ Mô hình chưa được huấn luyện. Không thể lưu checkpoint.")
         
         output_dir = os.path.dirname(model_path)
@@ -302,15 +304,17 @@ class LightGBMRankerTrainer:
             os.makedirs(output_dir, exist_ok=True)
 
         self.ranker.booster_.save_model(model_path)
-        print(f"[+] Đã lưu checkpoint mô hình tốt nhất vào {model_path}")
+        logger.info(f"LightGBM ranker booster model trees secured text-file format at: {model_path}")
 
     def load_model(self, model_path: str) -> lgb.LGBMRanker:
         """Tải mô hình từ checkpoint có sẵn để phục vụ cho Inference/Evaluation nhanh."""
         if not os.path.exists(model_path):
+            logger.error(f"LightGBM configuration text file not found at: {model_path}")
             raise FileNotFoundError(f"❌ Không tìm thấy checkpoint mô hình tại: {model_path}")
             
-        print(f"[*] Đang tải mô hình từ {model_path}...")
+        logger.info(f"Loading pre-compiled LightGBM ranker assets from: {model_path}")
         bst = lgb.Booster(model_file=model_path)
         self.ranker = lgb.LGBMRanker()
         self.ranker.booster_ = bst
+        logger.info("LightGBM ranker components re-activated successfully.")
         return self.ranker

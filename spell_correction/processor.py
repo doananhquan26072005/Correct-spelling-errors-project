@@ -1,11 +1,17 @@
-import os
+# -*- coding: utf-8 -*-
 import math
+import os
+import time
+from collections import Counter, defaultdict
+from typing import Dict, List, Set, Tuple
 import numpy as np
 import pandas as pd
-from collections import defaultdict, Counter
-from typing import List, Dict, Set, Tuple
-from spell_correction.utils import create_telex_form, compute_edit_distance, compute_edit_distance_telex
+
+from common.logger import get_logger
 from spell_correction.evaluator import HeuristicScorer
+from spell_correction.utils import compute_edit_distance, compute_edit_distance_telex, create_telex_form
+
+logger = get_logger(__name__)
 
 # ==========================================
 # 1. TEENCODE PROCESSOR MODULE
@@ -15,15 +21,16 @@ class TeencodeProcessor:
     """Chịu trách nhiệm nạp và xử lý thay thế các từ viết tắt/teencode."""
     def __init__(self, teen_code_path: str):
         self.abbreviation_dict: Dict[str, str] = {}
+        logger.info(f"Initializing TeencodeProcessor with dictionary target: {teen_code_path}")
         self._load_dictionary(teen_code_path)
         
     def _load_dictionary(self, path: str):
         if not os.path.exists(path):
-            print(f"⚠️ Warning: Teen code file not found at {path}")
+            logger.warning(f"Teencode map file NOT found at '{path}'. Skipping loading sequence.")
             return
             
         with open(path, 'r', encoding='utf-8') as f:
-            for line in f:
+            for line_idx, line in enumerate(f, 1):
                 line = line.strip()
                 if not line:
                     continue
@@ -32,14 +39,19 @@ class TeencodeProcessor:
                     shortcut = parts[0].lower()
                     full_word = parts[1].lower()
                     self.abbreviation_dict[shortcut] = full_word
+        logger.info(f"Successfully mapped {len(self.abbreviation_dict):,} teencode shorthand conversion pairs.")
 
     def replace_abbreviations(self, sentence: str) -> str:
         words = sentence.lower().split()
+        replaced_count = 0
         for i, word in enumerate(words):
             if word in self.abbreviation_dict:
-                # Chỉ thay thế nếu từ tương ứng là từ đơn để giữ nguyên cấu trúc index câu
                 if len(self.abbreviation_dict[word].split()) == 1:
+                    logger.debug(f"Teencode replacement matched: '{word}' -> '{self.abbreviation_dict[word]}'")
                     words[i] = self.abbreviation_dict[word]
+                    replaced_count += 1
+        if replaced_count > 0:
+            logger.debug(f"Total shorthand replacements executed in sentence: {replaced_count}")
         return " ".join(words)
 
 # ==========================================
@@ -49,21 +61,22 @@ class TeencodeProcessor:
 class CandidateGenerator:
     """Chịu trách nhiệm quản lý Symmetric Delete và tra cứu ứng viên từ vựng sơ bộ."""
     
-    # CẬP NHẬT: Thêm tham số telex_dict vào hàm __init__
     def __init__(self, vocab: List[str], telex_dict: Dict, cfg=None):
         self.vocab = vocab
         self.cfg = cfg
-        self.telex_dict = telex_dict  # Lưu trữ telex_dict vào thuộc tính của Class
+        self.telex_dict = telex_dict
         self.sym_dict = defaultdict(list)
         
         self.counts_1 = Counter()
         self.counts_2 = Counter()
         self.counts_3 = Counter()
         
+        logger.info("Building internal Symmetric Delete inverted index framework...")
+        start_time = time.time()
         self._build_symmetric_delete_dictionary()
+        logger.info(f"Symmetric Delete index compiled successfully in {time.time() - start_time:.2f}s.")
 
     def get_deletes(self, word: str, k: int = 2) -> Set[str]:
-        """Tạo tập các biến thể xóa từ 0 đến k ký tự của một chuỗi."""
         queue = {word}
         variant_list = set()
         
@@ -78,14 +91,12 @@ class CandidateGenerator:
         return variant_list
 
     def _build_symmetric_delete_dictionary(self):
-        """Ánh xạ toàn bộ biến thể xóa của Vocab vào sym_dict."""
         max_delete_k = self.cfg.candidate_generation.max_delete_k if self.cfg and hasattr(self.cfg, 'candidate_generation') else 2
 
         for word in self.vocab:
             if ' ' in word:
                 continue
             
-            # CẬP NHẬT: Sử dụng self.telex_dict thay vì self.cfg.telex_dict
             base_forms = [word] + create_telex_form(word, self.telex_dict)
             for form in base_forms:
                 if word not in self.sym_dict[form]:
@@ -95,9 +106,12 @@ class CandidateGenerator:
                 for variant in variant_list:
                     if word not in self.sym_dict[variant]:
                         self.sym_dict[variant].append(word)
+        logger.debug(f"Total distinct keys loaded into sym_dict inverted index: {len(self.sym_dict):,}")
 
     def fit_ngram_counts(self, train_targets: pd.Series):
-        """Thống kê tần suất xuất hiện Uni/Bi/Tri-gram từ tập huấn luyện."""
+        logger.info("Computing Uni/Bi/Tri-gram contextual background frequency tables...")
+        start_time = time.time()
+        
         for sentence in train_targets:
             tokens = str(sentence).lower().split()
             if not tokens:
@@ -109,12 +123,15 @@ class CandidateGenerator:
             
             trigrams = [" ".join(t) for t in zip(tokens, tokens[1:], tokens[2:])]
             self.counts_3.update(trigrams)
+            
+        logger.info(
+            f"N-gram frequency mappings generated in {time.time() - start_time:.2f}s | "
+            f"Unigrams: {len(self.counts_1):,} | Bigrams: {len(self.counts_2):,} | Trigrams: {len(self.counts_3):,}"
+        )
 
     def lookup(self, word: str, word_to_idx: Dict[str, int], k: int = 2) -> List[str]:
-        """Tra cứu nhanh danh sách các ứng viên được xếp hạng sơ bộ theo khoảng cách và tần suất unigram."""
         max_delete_k = self.cfg.candidate_generation.max_delete_k if self.cfg and hasattr(self.cfg, 'candidate_generation') else 2
 
-        # CẬP NHẬT: Sử dụng self.telex_dict
         variant_list = [word] + list(self.get_deletes(word, k=max_delete_k))
         for telex_form in create_telex_form(word, self.telex_dict):
             variant_list += list(self.get_deletes(telex_form, k=max_delete_k))
@@ -126,10 +143,7 @@ class CandidateGenerator:
                     if suggestion in candidates:
                         continue
 
-                    # CẬP NHẬT: Sử dụng self.telex_dict tại đây
                     raw_pairs = self.cfg.confusion_pairs if (self.cfg and hasattr(self.cfg, 'confusion_pairs')) else {}
-
-                    # Nếu hệ thống tự biến nó thành SimpleNamespace, ta ép nó về dict rỗng, hoặc giữ nguyên nếu đã là dict
                     if hasattr(raw_pairs, '__dict__'):
                         confusion_dict = raw_pairs.__dict__
                     elif isinstance(raw_pairs, dict):
@@ -137,36 +151,29 @@ class CandidateGenerator:
                     else:
                         confusion_dict = {}
 
-                    # 2. Truyền confusion_dict (chắc chắn là dict) vào hàm tính khoảng cách
                     dist = compute_edit_distance_telex(
                         word, 
                         suggestion, 
                         self.telex_dict, 
-                        confusion_dict, # Đã được ép kiểu dict an toàn, không lo sập nữa!
+                        confusion_dict,
                         self.cfg
                     )
                     if dist <= k and suggestion in word_to_idx and self.counts_1.get(suggestion, 0) > 0:
                         candidates[suggestion] = (dist, self.counts_1.get(suggestion, 0))
 
         result = sorted(candidates.items(), key=lambda x: (x[1][0], -x[1][1]))
-        return [cand_word for cand_word, _ in result]
+        candidate_words = [cand_word for cand_word, _ in result]
+        
+        logger.debug(f"Lookup for suspect '{word}': Generated {len(candidate_words)} early-stage candidate structures.")
+        return candidate_words
 
 # ==========================================
 # 5. FEATURE EXTRACTOR MODULE
 # ==========================================
 
-# -*- coding: utf-8 -*-
-import math
-from typing import List, Dict, Set, Tuple
-import numpy as np
-
-# Đảm bảo hàm này đã được import ở đầu file processor.py của bạn
-# from spell_correction.utils import compute_edit_distance_telex
-
 class FeatureExtractor:
     """Đảm nhiệm việc trích xuất vector đặc trưng đa nguồn từ danh sách ứng viên."""
     
-    # CẬP NHẬT: Thêm tham số telex_dict trực tiếp vào hàm khởi tạo
     def __init__(self, word_to_idx: Dict[str, int], norm_embedding_matrix: np.ndarray, 
                  stopwords: Set[str], telex_dict: Dict = None, cfg=None):
         self.word_to_idx = word_to_idx
@@ -174,22 +181,25 @@ class FeatureExtractor:
         self.stopwords = stopwords
         self.cfg = cfg
         
-        # Xử lý gán telex_dict an toàn chống lỗi AttributeError
         if telex_dict is not None:
             self.telex_dict = telex_dict
         else:
             self.telex_dict = cfg.telex_dict if (cfg and hasattr(cfg, 'telex_dict')) else {}
-            
-        # Khởi tạo đối tượng chấm điểm chuyên biệt (Giữ nguyên theo code của bạn nếu có class này)
-        # self.scorer = HeuristicScorer(self.cfg)
+        logger.info("FeatureExtractor module online and fully calibrated.")
 
     def extract_similarity_features(self, valid_candidates: List[str], ctx_indices: List[int], ctx_weights: List[float]) -> Dict[str, float]:
-        cand_to_sim = {}
+        cand_to_sim = {c: 0.0 for c in valid_candidates}
+        
         if valid_candidates and ctx_indices:
-            # Phòng ngừa từ không có trong word_to_idx
-            cand_indices = [self.word_to_idx[c] for c in valid_candidates if c in self.word_to_idx]
+            actual_candidates = []
+            cand_indices = []
+            for c in valid_candidates:
+                if c in self.word_to_idx:
+                    actual_candidates.append(c)
+                    cand_indices.append(self.word_to_idx[c])
+            
             if not cand_indices:
-                return {c: 0.0 for c in valid_candidates}
+                return cand_to_sim
                 
             C = self.norm_embedding_matrix[cand_indices]
             W = self.norm_embedding_matrix[ctx_indices]
@@ -199,14 +209,10 @@ class FeatureExtractor:
             S_weighted = S * weights_array
             
             max_sims = np.max(S_weighted, axis=1)
-            cand_to_sim = {valid_candidates[i]: float(max_sims[i]) for i, _ in enumerate(cand_indices)}
             
-            # Gán 0.0 cho những từ fallback nếu không tìm thấy index
-            for c in valid_candidates:
-                if c not in cand_to_sim:
-                    cand_to_sim[c] = 0.0
-        else:
-            cand_to_sim = {c: 0.0 for c in valid_candidates}
+            for i, cand_word in enumerate(actual_candidates):
+                cand_to_sim[cand_word] = float(max_sims[i])
+                
         return cand_to_sim
 
     def extract_kenlm_feature(self, candidate: str, prefix_str: str, suffix_str: str, model_lm) -> Tuple[float, float]:
@@ -244,24 +250,15 @@ class FeatureExtractor:
         return min(len_err, len_cand) / max(len_err, len_cand) if max(len_err, len_cand) > 0 else 0
 
     def extract_candidates_and_features(
-        self, 
-        error_word: str, 
-        sentence_words: List[str], 
-        error_idx: int, 
-        error_indices: List[int], 
-        candidates: List[str], 
-        model_lm, 
-        generator
+        self, error_word: str, sentence_words: List[str], error_idx: int, 
+        error_indices: List[int], candidates: List[str], model_lm, generator
     ) -> List[Tuple[str, List[float]]]:
-        """
-        Trích xuất tập hợp các đặc trưng (Similarity, N-gram, Length Ratio, KenLM, Edit Distance...) cho toàn bộ ứng viên.
-        """
+        
         if not candidates:
             return []
 
         candidates_with_features = []
         
-        # 1. Khởi tạo và chuẩn hóa bộ confusion_pairs chống lỗi SimpleNamespace/None Type
         raw_pairs = self.cfg.confusion_pairs if (self.cfg and hasattr(self.cfg, 'confusion_pairs')) else {}
         if hasattr(raw_pairs, '__dict__'):
             confusion_dict = raw_pairs.__dict__
@@ -270,22 +267,16 @@ class FeatureExtractor:
         else:
             confusion_dict = {}
 
-        # 2. Tiền xử lý dữ liệu ngữ cảnh cho mô hình Word Embedding Similarity
         ctx_indices = []
         ctx_weights = []
-        # Quét các từ xung quanh làm ngữ cảnh (loại bỏ từ lỗi hiện tại và từ dừng)
         for i, w in enumerate(sentence_words):
             if i != error_idx and w not in self.stopwords and w in self.word_to_idx:
                 ctx_indices.append(self.word_to_idx[w])
-                # Tính trọng số khoảng cách (Càng gần từ lỗi trọng số càng cao)
                 weight = 1.0 / (abs(i - error_idx) + 1.0)
                 ctx_weights.append(weight)
 
-        # Tính toán ma trận độ tương đồng cho toàn bộ danh sách ứng viên cùng lúc để tối ưu hiệu năng
         sim_map = self.extract_similarity_features(candidates, ctx_indices, ctx_weights)
 
-        # 3. Tiền xử lý chuỗi ngữ cảnh phục vụ N-gram và KenLM
-        # Lấy từ phía trước và phía sau an toàn, tránh lỗi IndexOutOfBounds
         prev_word = sentence_words[error_idx - 1].lower() if error_idx - 1 >= 0 else ""
         prev_2_word = sentence_words[error_idx - 2].lower() if error_idx - 2 >= 0 else ""
         next_word = sentence_words[error_idx + 1].lower() if error_idx + 1 < len(sentence_words) else ""
@@ -294,36 +285,35 @@ class FeatureExtractor:
         prefix_str = " ".join(sentence_words[:error_idx]) + " " if error_idx > 0 else ""
         suffix_str = " " + " ".join(sentence_words[error_idx + 1:]) if error_idx + 1 < len(sentence_words) else ""
 
-        # 4. Trích xuất tuần tự đặc trưng cho từng ứng viên
         for cand in candidates:
             features = []
             cand_lower = cand.lower()
             
-            # 1. Similarity (1)
+            # 1. Similarity
             features.append(sim_map.get(cand, 0.0))
 
             # 2. N-gram counts
-            c1, c2, c3, norm_c1, norm_c2, norm_c3 = self.extract_ngram_counts_feature(
+            _, _, _, norm_c1, norm_c2, norm_c3 = self.extract_ngram_counts_feature(
                 candidate_lower=cand_lower, prev_word=prev_word, prev_2_word=prev_2_word,
                 next_word=next_word, next_2_word=next_2_word, generator=generator
             )
-            # CHỈ LẤY 3 đặc trưng normalized thay vì cả 6
             features.extend([norm_c1, norm_c2, norm_c3])
 
-            # 3. Length Ratio (1)
+            # 3. Length Ratio
             features.append(self.extract_length_ratio_feature(error_word, cand))
 
             # 4. KenLM scores
-            ken_score, norm_ken = self.extract_kenlm_feature(cand, prefix_str, suffix_str, model_lm)
-            # CHỈ LẤY 1 đặc trưng norm_ken thay vì cả 2
+            _, norm_ken = self.extract_kenlm_feature(cand, prefix_str, suffix_str, model_lm)
             features.append(norm_ken)
 
-            # 5. Edit Distance (1)
+            # 5. Edit Distance
             edit_dist = compute_edit_distance_telex(error_word, cand, self.telex_dict, confusion_dict, self.cfg)
             features.append(float(edit_dist))
 
-            # Lúc này: 1 + 3 + 1 + 1 + 1 = ĐÚNG 7 ĐẶC TRƯNG
             candidates_with_features.append((cand, features))
+            
+        logger.debug(f"Feature vector compilation complete for {len(candidates)} candidates of error token '{error_word}'.")
+        return candidates_with_features
     
 class SpellCorrectionPipeline:
     def __init__(self, cfg, evaluator, model_lm, generator, extractor_engine, ranker, word_to_idx):
@@ -337,26 +327,35 @@ class SpellCorrectionPipeline:
         self.extractor_engine = extractor_engine
         self.ranker = ranker
         self.word_to_idx = word_to_idx
+        logger.info("SpellCorrectionPipeline deployed and verified.")
 
     def correct_sentence(self, sentence: str) -> str:
         """
         Pipeline khép kín nhận diện lỗi, trích xuất đặc trưng và sửa lỗi câu hoàn chỉnh.
-        :param sentence: Chuỗi văn bản đầu vào (Đã qua xử lý teencode nếu cần)
-        :return: Chuỗi văn bản đã được sửa lỗi
         """
+        logger.info(f"=== STARTING TYPO CORRECTION PIPELINE FOR: '{sentence}' ===")
+        start_pipeline = time.time()
+        
         error_indices = self.evaluator.detect_error(sentence)
         sentence_tokens = sentence.split()
+        
+        if error_indices:
+            logger.debug(f"Detected potential typographical errors at token indices: {error_indices}")
+        else:
+            logger.debug("No clear typos identified by the initial heuristic evaluator.")
 
         for idx in error_indices:
             if idx >= len(sentence_tokens):
                 continue
             error_word = sentence_tokens[idx]
+            logger.info(f"Processing correction sequence for token suspect: '{error_word}' at index [{idx}]")
 
             # 1. Sinh ứng viên thô qua lookup
             k_candidates = self.cfg.candidate_generation.top_k_raw if hasattr(self.cfg, 'candidate_generation') else 2
             raw_candidates = self.generator.lookup(error_word, self.word_to_idx, k=k_candidates)
 
             if not raw_candidates:
+                logger.warning(f"Unable to discover appropriate dictionary suggestions for token '{error_word}'. Skipping.")
                 continue
 
             # 2. Trích xuất vector đặc trưng động
@@ -378,9 +377,20 @@ class SpellCorrectionPipeline:
 
             # 3. Dự đoán phân hạng điểm số bằng LightGBM Ranker
             scores = self.ranker.predict(X_infer)
-            best_candidate = cand_words[np.argmax(scores)]
+            best_idx = np.argmax(scores)
+            best_candidate = cand_words[best_idx]
+            
+            logger.debug(f"Candidate: {best_candidate} achieved max LightGBM rank score: {scores[best_idx]:.4f}")
 
             # 4. Thay thế từ đúng ngữ cảnh vào chuỗi token phục vụ bước tiếp theo
-            sentence_tokens[idx] = best_candidate
+            if error_word != best_candidate:
+                logger.info(f"Successfully amended typo: '{error_word}' -> '{best_candidate}'")
+                sentence_tokens[idx] = best_candidate
+            else:
+                logger.debug(f"Model decided to retain original spelling structure for token: '{error_word}'")
 
-        return " ".join(sentence_tokens)
+        corrected_sentence = " ".join(sentence_tokens)
+        logger.info(f"=== PIPELINE COMPLETED. Elapsed execution time: {time.time() - start_pipeline:.4f}s ===")
+        logger.info(f"Final Output String: '{corrected_sentence}'")
+        
+        return corrected_sentence

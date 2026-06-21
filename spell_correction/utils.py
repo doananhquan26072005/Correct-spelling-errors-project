@@ -9,7 +9,6 @@ _ADJACENT_KEYS: Dict[str, str] = {
 }
 
 def create_telex_form(word: str, telex_dict: dict) -> List[str]:
-    """Tạo nhiều biến thể Telex của 1 từ tiếng Việt dựa trên quy tắc Unicode."""
     word = word.lower()
     prefix, vowel_base, suffix, word_tone, word_mod = "", "", "", "", ""
     VOWELS = "aeiouy"
