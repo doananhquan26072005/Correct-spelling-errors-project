@@ -124,6 +124,114 @@ pip install -r requirements.txt
 
 ---
 
+## Installing KenLM
+
+This project uses **KenLM** as the statistical language model for candidate scoring.
+
+### Windows
+
+#### Option 1 (Recommended)
+
+Install the Python package directly:
+
+```bash
+pip install https://github.com/kpu/kenlm/archive/master.zip
+```
+
+If the installation fails, install a C++ compiler (Visual Studio Build Tools) and CMake first.
+
+#### Option 2 (Build from Source)
+
+Clone the repository:
+
+```bash
+git clone https://github.com/kpu/kenlm.git
+cd kenlm
+```
+
+Create a build directory:
+
+```bash
+mkdir build
+cd build
+```
+
+Configure and build:
+
+```bash
+cmake ..
+cmake --build . --config Release
+```
+
+Then install the Python bindings:
+
+```bash
+cd ../python
+pip install .
+```
+
+---
+
+### Linux
+
+Install required packages:
+
+```bash
+sudo apt update
+sudo apt install build-essential cmake libboost-all-dev zlib1g-dev
+```
+
+Clone and build KenLM:
+
+```bash
+git clone https://github.com/kpu/kenlm.git
+cd kenlm
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+```
+
+Install the Python bindings:
+
+```bash
+cd ../python
+pip install .
+```
+
+---
+
+### Verify Installation
+
+Run the following command:
+
+```python
+import kenlm
+print(kenlm.__version__)
+```
+
+or simply
+
+```python
+import kenlm
+```
+
+If no error is raised, KenLM has been installed successfully.
+
+---
+
+### Using a Language Model
+
+Download or train a KenLM language model (e.g., `model_lm.bin`) and specify its path in `configs/correction_config.yaml`:
+
+```yaml
+language_model:
+  path: models/model_lm.bin
+```
+
+The project will automatically load this model during spelling correction.
+
+
 ## Configuration
 
 Training parameters are stored in
