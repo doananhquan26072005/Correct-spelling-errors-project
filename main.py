@@ -169,26 +169,26 @@ def main():
             ranker=ranker, word_to_idx=word_to_idx
         )
 
-        # evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
-        # evaluator.evaluate_ranking_performance(
-        #     validation_df=df1_valid, abbr_engine=abbr_engine,
-        #     extractor_engine=extractor_engine, generator=generator,
-        #     ranker=ranker, stopwords=stopwords
-        # )
-        # evaluator.evaluate_word_accuracy(
-        #     validation_df=df1_valid, abbr_engine=abbr_engine,
-        #     pipeline_correct_fn=pipeline.correct_sentence,
-        #     stopwords=stopwords, word_to_idx=word_to_idx
-        # )
-        # evaluator.evaluate_end_to_end(
-        #     validation_df=df1_valid, abbr_engine=abbr_engine,
-        #     pipeline_correct_fn=pipeline.correct_sentence, stopwords=stopwords
-        # )
+        evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
+        evaluator.evaluate_ranking_performance(
+            validation_df=df1_valid, abbr_engine=abbr_engine,
+            extractor_engine=extractor_engine, generator=generator,
+            ranker=ranker, stopwords=stopwords
+        )
+        evaluator.evaluate_word_accuracy(
+            validation_df=df1_valid, abbr_engine=abbr_engine,
+            pipeline_correct_fn=pipeline.correct_sentence,
+            stopwords=stopwords, word_to_idx=word_to_idx
+        )
+        evaluator.evaluate_end_to_end(
+            validation_df=df1_valid, abbr_engine=abbr_engine,
+            pipeline_correct_fn=pipeline.correct_sentence, stopwords=stopwords
+        )
 
-        # visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
-        # exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
-        #     validation_df=df1_valid, stopwords=stopwords, num_samples=200
-        # )
+        visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
+        exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
+            validation_df=df1_valid, stopwords=stopwords, num_samples=200
+        )
 
         # ==========================================
         # 7. CHẠY KHÔI PHỤC DẤU TRÊN DF2 (DIACRITIC RESTORATION)
@@ -228,21 +228,21 @@ def main():
         # Chúng ta mượn luôn evaluator từ spell_correction
 
         # 1. Đánh giá Accuracy cấp độ từ
-        # evaluator.evaluate_word_accuracy(
-        #     validation_df=df2_valid,
-        #     abbr_engine=abbr_engine, # Có thể None nếu khôi phục dấu không cần teen code
-        #     pipeline_correct_fn=restorer.process, # Truyền hàm suy luận của Diacritic vào đây
-        #     stopwords=stopwords,
-        #     word_to_idx=word_to_idx
-        # )
+        evaluator.evaluate_word_accuracy(
+            validation_df=df2_valid,
+            abbr_engine=abbr_engine, # Có thể None nếu khôi phục dấu không cần teen code
+            pipeline_correct_fn=restorer.process, # Truyền hàm suy luận của Diacritic vào đây
+            stopwords=stopwords,
+            word_to_idx=word_to_idx
+        )
 
-        # # 2. Đánh giá WER / SER đầu cuối
-        # evaluator.evaluate_end_to_end(
-        #     validation_df=df2_valid,
-        #     abbr_engine=abbr_engine,
-        #     pipeline_correct_fn=restorer.process, # Truyền hàm suy luận của Diacritic vào đây
-        #     stopwords=stopwords
-        # )
+        # 2. Đánh giá WER / SER đầu cuối
+        evaluator.evaluate_end_to_end(
+            validation_df=df2_valid,
+            abbr_engine=abbr_engine,
+            pipeline_correct_fn=restorer.process, # Truyền hàm suy luận của Diacritic vào đây
+            stopwords=stopwords
+        )
         logger.info("=== PHẦN 6: ĐÁNH GIÁ HỆ THỐNG TRÊN TẬP TEST CHUNG (KHÔNG CHIA TÁCH) ===")
 
         # 💡 Định nghĩa hàm chuỗi liên kết (Joint Pipeline Function)
@@ -272,7 +272,7 @@ def main():
         
         # 7.1 Đánh giá Accuracy cấp độ từ trên tập test tổng hợp
         evaluator.evaluate_word_accuracy(
-            validation_df=df_test[:100], # Truyền trực tiếp tập test thô vào đây
+            validation_df=df_test, # Truyền trực tiếp tập test thô vào đây
             abbr_engine=abbr_engine,
             pipeline_correct_fn=joint_nlp_pipeline, # Sử dụng hàm kết hợp chuỗi
             stopwords=stopwords,
@@ -281,7 +281,7 @@ def main():
 
         # 7.2 Đánh giá WER / SER (Word/Sentence Error Rate) cuối cùng trên toàn tập test
         evaluator.evaluate_end_to_end(
-            validation_df=df_test[:100],
+            validation_df=df_test,
             abbr_engine=abbr_engine,
             pipeline_correct_fn=joint_nlp_pipeline,
             stopwords=stopwords
