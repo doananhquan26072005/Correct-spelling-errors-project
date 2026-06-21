@@ -21,43 +21,53 @@ A modular Vietnamese spelling correction system developed using Natural Language
 ```text
 .
 ├── common/
-│   ├── config.py                 # Configuration loader
+│   ├── config.py                 # Configuration management
 │   └── logger.py                 # Logging utilities
 │
 ├── configs/
-│   └── correction_config.yaml    # Training configuration
+│   ├── correction_config.yaml    # Spell correction configuration
+│   └── diacritic_config.yaml     # Diacritic restoration configuration
 │
 ├── data/
-│   ├── external/                 # External resources
+│   ├── external/                 # External resources (vocabularies, dictionaries, language models)
 │   ├── processed/                # Processed datasets
 │   └── raw/                      # Raw datasets
 │
-├── models/                       # Saved models
+├── logs/                         # Training and application logs
 │
-├── notebooks/                    # Experiments
+├── models/                       # Trained model checkpoints
 │
 ├── scripts/
-│   ├── correction_train.py       # Main training script
-│   └── diacritic_train.py
+│   ├── correction_train.py       # Spell correction training script
+│   └── diacritic_train.py        # Diacritic restoration training script
+│
+├── diacritic_restoration/
+│   ├── __init__.py
+│   ├── dataset.py                # Dataset loading and preprocessing
+│   ├── vocab.py                  # Vocabulary construction and management
+│   ├── model.py                  # Seq2Seq model architecture
+│   ├── processor.py              # Data processing and text transformation
+│   ├── trainer.py                # Model training and validation
+│   ├── utils.py                  # Utility functions
+│   └── metrics.py                # Evaluation metrics
 │
 ├── spell_correction/
 │   ├── __init__.py
-│   ├── abbr_processor.py         # Abbreviation processing
-│   ├── candidate_generator.py    # Candidate generation
-│   ├── dataset.py                # Dataset preparation
-│   ├── evaluator.py              # Evaluation utilities
-│   ├── feature_extractor.py      # Candidate features
-│   ├── lightgbm_trainer.py       # LightGBM training
+│   ├── abbr_processor.py         # Abbreviation normalization
+│   ├── candidate_generator.py    # Candidate word generation
+│   ├── dataset.py                # Dataset loading and preprocessing
+│   ├── evaluator.py              # Model evaluation
+│   ├── feature_extractor.py      # Candidate feature extraction
+│   ├── lightgbm_trainer.py       # LightGBM ranker training
 │   ├── pipeline.py               # End-to-end correction pipeline
 │   ├── skipgram_trainer.py       # Skip-gram embedding training
-│   └── visualizer.py             # Visualization
+│   └── visualizer.py             # Data and result visualization
 │
-├── main.py
-├── requirements.txt
-└── README.md
+├── main.py                       # Application entry point
+├── requirements.txt              # Project dependencies
+└── README.md                     # Project documentation
 ```
 
----
 
 ## Pipeline
 
