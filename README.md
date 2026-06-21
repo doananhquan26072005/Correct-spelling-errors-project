@@ -1,93 +1,89 @@
-# Vietnamese Correct Spelling Errors
+# Vietnamese Spelling Correction
 
-A Vietnamese NLP project for automatic text correction, including:
-
-* **Diacritic Restoration** (khôi phục dấu tiếng Việt)
-* **Spelling Correction** (sửa lỗi chính tả)
-* End-to-end correction pipeline
-
-The project combines statistical language models and deep learning models to improve Vietnamese text quality.
-
----
+A modular Vietnamese spelling correction system developed using Natural Language Processing (NLP) techniques. The project focuses on detecting and correcting spelling errors by combining candidate generation, feature engineering, statistical language models, and machine learning.
 
 ## Features
 
-* Vietnamese diacritic restoration
-* Vietnamese spelling correction
-* End-to-end correction pipeline
-* Configurable through YAML files
-* Training and evaluation scripts
+* Vietnamese spelling error detection and correction
+* Candidate generation based on edit operations
+* Abbreviation normalization
+* Feature extraction for candidate ranking
+* Skip-gram word embedding training
+* LightGBM-based candidate ranking
+* Configurable training pipeline
 * Logging support
-* Modular architecture for future extensions
+* Visualization and evaluation tools
 
 ---
 
 ## Project Structure
 
 ```text
-project/
-│
+.
 ├── common/
-│   ├── config.py
-│   ├── logger.py
-│   └── utils.py
+│   ├── config.py                 # Configuration loader
+│   └── logger.py                 # Logging utilities
 │
 ├── configs/
-│   ├── correction_config.yaml
-│   └── diacritic_config.yaml
+│   └── correction_config.yaml    # Training configuration
 │
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── external/
+│   ├── external/                 # External resources
+│   ├── processed/                # Processed datasets
+│   └── raw/                      # Raw datasets
 │
-├── models/
+├── models/                       # Saved models
 │
-├── notebooks/
+├── notebooks/                    # Experiments
+│
+├── scripts/
+│   ├── correction_train.py       # Main training script
+│   └── diacritic_train.py
 │
 ├── spell_correction/
-│   ├── processor.py
-│   ├── process_dataset.py
-│   ├── trainer.py
-│   └── evaluator.py
+│   ├── __init__.py
+│   ├── abbr_processor.py         # Abbreviation processing
+│   ├── candidate_generator.py    # Candidate generation
+│   ├── dataset.py                # Dataset preparation
+│   ├── evaluator.py              # Evaluation utilities
+│   ├── feature_extractor.py      # Candidate features
+│   ├── lightgbm_trainer.py       # LightGBM training
+│   ├── pipeline.py               # End-to-end correction pipeline
+│   ├── skipgram_trainer.py       # Skip-gram embedding training
+│   └── visualizer.py             # Visualization
 │
-├── correction_train.py
-├── diacritic_train.py
 ├── main.py
-└── requirements.txt
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## System Overview
+## Pipeline
+
+The correction pipeline consists of the following stages:
 
 ```text
-                Raw Vietnamese Text
-                        │
-                        ▼
-             Text Preprocessing
-                        │
-        ┌───────────────┴───────────────┐
-        ▼                               ▼
- Diacritic Restoration          Spelling Correction
-        │                               │
-        └───────────────┬───────────────┘
-                        ▼
-             Corrected Vietnamese Text
+Input sentence
+        │
+        ▼
+Text preprocessing
+        │
+        ▼
+Abbreviation normalization
+        │
+        ▼
+Candidate generation
+        │
+        ▼
+Feature extraction
+        │
+        ▼
+LightGBM ranking model
+        │
+        ▼
+Corrected sentence
 ```
-
----
-
-## Technologies
-
-* Python
-* PyTorch
-* KenLM
-* HuggingFace Datasets
-* NumPy
-* Pandas
-* PyYAML
-* gdown
 
 ---
 
@@ -100,6 +96,26 @@ git clone https://github.com/doananhquan26072005/Correct-spelling-errors-project
 cd Correct-spelling-errors-project
 ```
 
+Create a virtual environment (recommended)
+
+```bash
+python -m venv .venv
+```
+
+Activate the environment
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
 Install dependencies
 
 ```bash
@@ -108,164 +124,110 @@ pip install -r requirements.txt
 
 ---
 
-## Dataset
-
-The project uses Vietnamese datasets for:
-
-* Diacritic restoration
-* Spelling correction
-* Vocabulary
-* Teen code dictionary
-* Telex typing rules
-* Vietnamese stopwords
-
-External resources are stored in
-
-```text
-data/external/
-```
-
-Processed datasets are stored in
-
-```text
-data/processed/
-```
-
----
-
 ## Configuration
 
-All experiment settings are managed by YAML configuration files.
-
-### Diacritic Restoration
-
-```text
-configs/diacritic_config.yaml
-```
-
-### Spelling Correction
+Training parameters are stored in
 
 ```text
 configs/correction_config.yaml
 ```
 
-Configurations include:
+Typical configuration options include
 
 * dataset paths
+* vocabulary paths
+* training parameters
 * model parameters
-* optimizer settings
-* training hyperparameters
-* checkpoint paths
-* logging options
+* logging configuration
+* output directories
 
 ---
 
 ## Training
 
-### Train Diacritic Restoration
+Train the correction model
 
 ```bash
-python diacritic_train.py
-```
-
-### Train Spelling Correction
-
-```bash
-python correction_train.py
+python scripts/correction_train.py
 ```
 
 ---
 
-## Inference
+## Running the Pipeline
 
-Run the complete correction pipeline
+Run the complete spelling correction pipeline
 
 ```bash
 python main.py
 ```
 
-The pipeline performs:
-
-1. Load configuration
-2. Load language model
-3. Restore Vietnamese diacritics
-4. Correct spelling errors
-5. Evaluate results
-
 ---
 
 ## Models
 
-Current project contains pretrained models inside
+The trained models are stored in
 
 ```text
 models/
 ```
 
-Additional models can be downloaded automatically when required.
+Depending on the configuration, the project can generate
+
+* Skip-gram embeddings
+* LightGBM ranking model
+* Intermediate artifacts
 
 ---
 
 ## Logging
 
-Logging utilities are implemented under
+Logging utilities are implemented in
 
 ```text
 common/logger.py
 ```
 
-Logs include
+Training logs include
 
 * training progress
 * evaluation metrics
-* pipeline execution
-* error tracking
+* warnings
+* runtime information
 
 ---
 
 ## Evaluation
 
-The evaluation module supports:
-
-* model evaluation
-* pipeline evaluation
-* end-to-end testing
-
-Implemented in
+Evaluation utilities are provided in
 
 ```text
 spell_correction/evaluator.py
 ```
 
----
+Possible evaluation metrics include
 
-## Future Improvements
-
-* Beam search decoding
-* Transformer-based language model
-* Better candidate generation
-* Real-word error correction
-* Web API deployment
-* Streamlit interface
-* Docker support
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* Word-level correction accuracy
 
 ---
 
-## Requirements
+## Dependencies
 
-Main dependencies include
+Major libraries used in this project include
 
 * Python 3.10+
 * PyTorch
-* KenLM
-* datasets
-* PyYAML
-* tqdm
+* LightGBM
 * NumPy
 * Pandas
-* python-Levenshtein
+* PyYAML
+* tqdm
+* scikit-learn
 
-Install all dependencies using
+Install all required packages with
 
 ```bash
 pip install -r requirements.txt
@@ -273,6 +235,17 @@ pip install -r requirements.txt
 
 ---
 
+## Future Work
+
+* Deep learning ranking models
+* Context-aware candidate generation
+* Transformer-based correction
+* REST API deployment
+* Web interface
+* Docker support
+
+---
+
 ## Authors
 
-Developed as a Vietnamese Natural Language Processing project focusing on automatic spelling correction and diacritic restoration.
+This project was developed as part of a Vietnamese Natural Language Processing study on automatic spelling correction.
