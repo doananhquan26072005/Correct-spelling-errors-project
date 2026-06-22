@@ -90,6 +90,45 @@ def main():
         df2_test = pd.DataFrame(df2['test'])
         logger.info(f"Corpus split completed | df1 train: {len(df1_train)} | df2 train: {len(df2_train)}")
 
+        logger.info("=== RUNNING DIACRITIC RESTORATION PIPELINE ON DF2 ===")
+        data_factory = DiacriticDataLoaderFactory(dia_cfg)
+        train_loader, valid_loader, test_loader, char_vocab, word_vocab = data_factory.build_loaders_and_vocabs(df2_train, df2_valid, df2_test)
+        allowed_mask = build_allowed_token_mask(char_vocab, dia_cfg)
+
+        restorer = DiacriticRestorer(
+            checkpoint_path=dia_cfg.training.checkpoint_path,
+            cfg=dia_cfg
+        )
+        
+        logger.info("=== LIVE INFERENCE DEMO ON DF2 ===")
+        col_name = 'input' if 'input' in df2_valid.columns else df2_valid.columns[0]
+        df2_examples = df2_valid[col_name].dropna().head(10).tolist()
+
+        for idx, text in enumerate(df2_examples, 1):
+            inference_start = time.time()
+            predicted_text = restorer.process(text, stopwords)
+            inference_time = time.time() - inference_start
+            
+            logger.info(f"Sample #{idx} | Inference time: {inference_time*1000:.2f}ms")
+            logger.info(f"  > [IN]  : {text}")
+            logger.info(f"  > [OUT] : {predicted_text}")
+
+        logger.info("=== QUANTITATIVE EVALUATION FOR DIACRITIC RESTORATION ===")
+        evaluator.evaluate_word_accuracy(
+            validation_df=df2_valid,
+            abbr_engine=abbr_engine, 
+            pipeline_correct_fn=restorer.process, 
+            stopwords=stopwords,
+            word_to_idx=word_to_idx
+        )
+
+        evaluator.evaluate_end_to_end(
+            validation_df=df2_valid,
+            abbr_engine=abbr_engine,
+            pipeline_correct_fn=restorer.process, 
+            stopwords=stopwords
+        )
+
         logger.info("=== INITIALIZING INFERENCE ENGINES ===")
         model_lm = kenlm.Model(spell_cfg.paths.trigram_lm_file)
 
@@ -156,45 +195,6 @@ def main():
         visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
         exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
             validation_df=df1_valid, stopwords=stopwords, num_samples=200
-        )
-
-        logger.info("=== RUNNING DIACRITIC RESTORATION PIPELINE ON DF2 ===")
-        data_factory = DiacriticDataLoaderFactory(dia_cfg)
-        train_loader, valid_loader, test_loader, char_vocab, word_vocab = data_factory.build_loaders_and_vocabs(df2_train, df2_valid, df2_test)
-        allowed_mask = build_allowed_token_mask(char_vocab, dia_cfg)
-
-        restorer = DiacriticRestorer(
-            checkpoint_path=dia_cfg.training.checkpoint_path,
-            cfg=dia_cfg
-        )
-        
-        logger.info("=== LIVE INFERENCE DEMO ON DF2 ===")
-        col_name = 'input' if 'input' in df2_valid.columns else df2_valid.columns[0]
-        df2_examples = df2_valid[col_name].dropna().head(10).tolist()
-
-        for idx, text in enumerate(df2_examples, 1):
-            inference_start = time.time()
-            predicted_text = restorer.process(text, stopwords)
-            inference_time = time.time() - inference_start
-            
-            logger.info(f"Sample #{idx} | Inference time: {inference_time*1000:.2f}ms")
-            logger.info(f"  > [IN]  : {text}")
-            logger.info(f"  > [OUT] : {predicted_text}")
-
-        logger.info("=== QUANTITATIVE EVALUATION FOR DIACRITIC RESTORATION ===")
-        evaluator.evaluate_word_accuracy(
-            validation_df=df2_valid,
-            abbr_engine=abbr_engine, 
-            pipeline_correct_fn=restorer.process, 
-            stopwords=stopwords,
-            word_to_idx=word_to_idx
-        )
-
-        evaluator.evaluate_end_to_end(
-            validation_df=df2_valid,
-            abbr_engine=abbr_engine,
-            pipeline_correct_fn=restorer.process, 
-            stopwords=stopwords
         )
 
         logger.info("=== EVALUATING JOINT PIPELINE ON UNSPLIT GLOBAL TEST SET ===")
