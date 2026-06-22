@@ -12,7 +12,7 @@ def get_logger(module_name):
     logger = logging.getLogger(module_name)
     
     if not logger.handlers:
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
 
         formatter = logging.Formatter(
             '%(asctime)s - [%(name)s] - %(levelname)s - %(message)s',
