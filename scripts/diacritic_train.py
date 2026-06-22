@@ -1,6 +1,7 @@
 import time
 import torch
 import torch.nn as nn
+import pandas as pd
 
 from common.config import load_config
 from common.logger import get_logger
@@ -29,8 +30,26 @@ if __name__ == "__main__":
         logger.info(f"Target compute hardware device allocated: {cfg.training.device.upper()}")
 
         logger.info("=== DATA PREPARATION AND VOCABULARY BUILDING ===")
+        full_df = pd.read_csv(cfg.data.csv_path)
+
+        seed = cfg.training.seed if hasattr(cfg, "training") else 42
+        full_df = full_df.sample(frac=1.0, random_state=seed).reset_index(drop=True)
+
+        train_ratio = cfg.data.train_ratio if hasattr(cfg, "data") else 0.8
+        valid_ratio = cfg.data.valid_ratio if hasattr(cfg, "data") else 0.1
+
+        total_samples = len(full_df)
+        n_train = int(total_samples * train_ratio)
+        n_valid = int(total_samples * valid_ratio)
+
+        df_train = full_df.iloc[:n_train].reset_index(drop=True)
+        df_valid = full_df.iloc[n_train:n_train + n_valid].reset_index(drop=True)
+        df_test = full_df.iloc[n_train + n_valid:].reset_index(drop=True)
+
+        logger.info(f"CSV split completed | Train: {len(df_train):,} | Valid: {len(df_valid):,} | Test: {len(df_test):,}")
+
         data_factory = DiacriticDataLoaderFactory(cfg)
-        train_loader, valid_loader, test_loader, char_vocab, word_vocab = data_factory.build_loaders_and_vocabs()
+        train_loader, valid_loader, test_loader, char_vocab, word_vocab = data_factory.build_loaders_and_vocabs(df_train, df_valid, df_test)
         
         allowed_mask = build_allowed_token_mask(char_vocab, cfg)
 
