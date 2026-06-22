@@ -1,4 +1,3 @@
-import os
 import time
 import numpy as np
 from typing import List, Dict, Set, Tuple
@@ -29,12 +28,10 @@ class Evaluator:
 
             if is_oov:
                 error_indices.add(i)
-                # Đã gỡ bỏ logger.debug tránh spam I/O
                 
             valid_probs.append(prob)
             valid_indices.append(i)
 
-        # 2. Áp dụng cơ chế ngưỡng động kết hợp ngưỡng cứng từ Config (Heuristic KenLM)
         if valid_probs:
             mean_prob = np.mean(valid_probs)
             std_prob = np.std(valid_probs) 
@@ -61,7 +58,6 @@ class Evaluator:
 
     @staticmethod
     def find_misspelled_words_and_targets(input_sentence: str, target_sentence: str, word_to_idx: Dict[str, int]) -> Tuple[List[tuple], List[int]]:
-        """Tìm các cặp từ lỗi thực tế dựa trên nhãn Target chuẩn."""
         input_tokens = input_sentence.split()
         target_tokens = target_sentence.split()
         
@@ -82,13 +78,11 @@ class Evaluator:
 
     @staticmethod
     def calculate_f05(tp: int, fp: int, fn: int) -> float:
-        """Tính điểm F0.5 ưu tiên Precision."""
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
         return (1 + 0.5**2) * (precision * recall) / ((0.5**2 * precision) + recall) if (precision + recall) > 0 else 0
     
     def evaluate_error_detection(self, validation_df, abbr_engine):
-        """Quét qua tập dữ liệu validation để đánh giá độ chính xác giai đoạn phát hiện lỗi (Detect)."""
         logger.info("Executing Error Detection Performance Sweep...")
         start_time = time.time()
         
@@ -121,24 +115,23 @@ class Evaluator:
         f05_score = self.calculate_f05(total_TP, total_FP, total_FN)
 
         elapsed = time.time() - start_time
-        logger.info(f"Detection evaluation cycle finished in {elapsed:.2f} seconds.")
+        logger.info(f"Detection evaluation cycle finished in {elapsed:.2f}s.")
 
-        logger.info("==================== GIAI ĐOẠN PHÁT HIỆN LỖI (DETECTION) ====================")
-        logger.info(f" • Số lỗi thực tế (Actual Target) : {total_TP + total_FN:,}")
-        logger.info(f" • Số lỗi dự đoán (Model Predict) : {total_TP + total_FP:,}")
-        logger.info(f"   + Bắt trúng (True Positives)  : {total_TP:,}")
-        logger.info(f"   + Bắt nhầm (False Positives)  : {total_FP:,}")
-        logger.info(f"   + Bỏ sót (False Negatives)    : {total_FN:,}")
-        logger.info(f" • Precision (Độ chính xác bắt lỗi) : {precision * 100:.2f}%")
-        logger.info(f" • Recall (Độ phủ bắt lỗi)          : {recall * 100:.2f}%")
-        logger.info(f" • F0.5 Score (Ưu tiên Precision)   : {f05_score * 100:.2f}%")
-        logger.info("=============================================================================")
+        logger.info("==================== ERROR DETECTION METRICS ====================")
+        logger.info(f" • Actual Errors (Target)  : {total_TP + total_FN:,}")
+        logger.info(f" • Predicted Errors (Model): {total_TP + total_FP:,}")
+        logger.info(f"   + True Positives (TP)   : {total_TP:,}")
+        logger.info(f"   + False Positives (FP)  : {total_FP:,}")
+        logger.info(f"   + False Negatives (FN)  : {total_FN:,}")
+        logger.info(f" • Precision               : {precision * 100:.2f}%")
+        logger.info(f" • Recall                  : {recall * 100:.2f}%")
+        logger.info(f" • F0.5 Score              : {f05_score * 100:.2f}%")
+        logger.info("=================================================================")
 
         return {"precision": precision, "recall": recall, "f05": f05_score}
 
     def evaluate_ranking_performance(self, validation_df, abbr_engine, extractor_engine, generator, ranker, stopwords):
-        """Quét qua tập validation để đánh giá khả năng sắp xếp ứng viên của LightGBM Ranker."""
-        logger.info("Executing LightGBM Ranker Performance Sweep (MRR / Hit@K)...")
+        logger.info("Executing Ranker Performance Sweep (MRR / Hit@K)...")
         start_time = time.time()
 
         count_error_all = 0
@@ -173,7 +166,6 @@ class Evaluator:
                     correct_word.isdigit()):
                     continue
 
-                # ĐÃ CẬP NHẬT: Sử dụng hàm điều phối độc lập mới
                 candidates_with_features = extract_candidates_and_features(
                     error_word=error_word,
                     sentence_words=input_tokens,
@@ -220,18 +212,17 @@ class Evaluator:
         elapsed = time.time() - start_time
         logger.info(f"Ranking evaluation sweep complete in {elapsed:.2f}s.")
 
-        logger.info("==================== BÁO CÁO RANKING METRICS TRÊN TẬP VALID ====================")
-        logger.info(f" • Tổng số lỗi đưa vào đánh giá : {metrics['total_errors']:,}")
-        logger.info(f" • MRR (Mean Reciprocal Rank)    : {metrics['mrr']:.4f}")
-        logger.info(f" • Hit@1 (Top-1 Accuracy)        : {metrics['hit_at_1'] * 100:.2f}%")
-        logger.info(f" • Hit@3 (Có trong Top 3)        : {metrics['hit_at_3'] * 100:.2f}%")
-        logger.info(f" • Hit@5 (Có trong Top 5)        : {metrics['hit_at_5'] * 100:.2f}%")
-        logger.info("================================================================================")
+        logger.info("==================== RANKER CANDIDATE METRICS ====================")
+        logger.info(f" • Total Evaluated Errors : {metrics['total_errors']:,}")
+        logger.info(f" • MRR                    : {metrics['mrr']:.4f}")
+        logger.info(f" • Hit@1 (Top-1 Accuracy) : {metrics['hit_at_1'] * 100:.2f}%")
+        logger.info(f" • Hit@3                  : {metrics['hit_at_3'] * 100:.2f}%")
+        logger.info(f" • Hit@5                  : {metrics['hit_at_5'] * 100:.2f}%")
+        logger.info("==================================================================")
 
         return metrics
 
     def evaluate_word_accuracy(self, validation_df, abbr_engine, pipeline_correct_fn, stopwords, word_to_idx):
-        """Đánh giá độ chính xác cấp độ từ (Word Accuracy) của các từ sai được sửa."""
         logger.info("Evaluating Pipeline Word Accuracy metrics...")
         count_error = 0
         count_correct = 0
@@ -273,16 +264,15 @@ class Evaluator:
         total_errors = max(1, count_error)
         accuracy = count_correct / total_errors
             
-        logger.info("==================== KẾT QUẢ ĐÁNH GIÁ WORD ACCURACY ====================")
-        logger.info(f" • Tổng số từ lỗi mô hình thực xử lý : {total_errors:,}")
-        logger.info(f" • Số từ sửa trúng đáp án (Correct)   : {count_correct:,}")
-        logger.info(f" • Word Accuracy (Độ chính xác từ)  : {accuracy * 100:.2f}%")
-        logger.info("========================================================================")
+        logger.info("==================== PIPELINE WORD ACCURACY ====================")
+        logger.info(f" • Total Evaluated Error Words : {total_errors:,}")
+        logger.info(f" • Correctly Fixed Words       : {count_correct:,}")
+        logger.info(f" • Word Accuracy               : {accuracy * 100:.2f}%")
+        logger.info("================================================================")
 
         return {"word_accuracy": accuracy, "total_processed_errors": count_error}
 
     def evaluate_end_to_end(self, validation_df, abbr_engine, pipeline_correct_fn, stopwords):
-        """Đánh giá hiệu năng toàn cục End-to-End của hệ thống sửa lỗi chính tả."""
         logger.info("Launching final End-to-End system validation sweep...")
         
         total_word_errors = 0
@@ -315,13 +305,13 @@ class Evaluator:
         overall_wer = (total_word_errors / total_ref_words) * 100
         overall_ser = (exact_match_sentences / max(1, total_sentences)) * 100
 
-        logger.info("==================== BÁO CÁO TOÀN CỤC END-TO-END ====================")
-        logger.info(f" • Tổng số câu đưa vào đánh giá      : {total_sentences:,}")
-        logger.info(f" • Tổng số từ trong tập đích (N)     : {total_reference_words:,}")
-        logger.info(f" • Tổng số từ lỗi mô hình để sót/sinh : {total_word_errors:,}")
-        logger.info(f" • WER (Word Error Rate - Càng thấp càng tốt) : {overall_wer:.2f}%") 
-        logger.info(f" • SER (Sentence Exact Match - Càng cao càng tốt): {overall_ser:.2f}%") 
-        logger.info("=====================================================================")
+        logger.info("==================== END-TO-END PIPELINE PERFORMANCE ====================")
+        logger.info(f" • Total Evaluated Sentences : {total_sentences:,}")
+        logger.info(f" • Total Reference Tokens    : {total_reference_words:,}")
+        logger.info(f" • Total Remaining Errors    : {total_word_errors:,}")
+        logger.info(f" • WER (Word Error Rate)     : {overall_wer:.2f}%") 
+        logger.info(f" • SER (Sentence Error Rate) : {100 - overall_ser:.2f}% (Exact Match: {overall_ser:.2f}%)") 
+        logger.info("=========================================================================")
 
         return {
             "wer": overall_wer,

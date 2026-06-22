@@ -4,7 +4,7 @@ paths:
   stopwords_file: "data/external/vietnamese-stopwords.txt"
   telex_file: "data/external/telex.txt"
   teen_code_file: "data/external/teen_code.txt"
-  trigram_lm_file: "data/processed/trigram.bin"
+  trigram_lm_file: "models/trigram.bin"
   skipgram_model_file: "models/model_skipgram.pth"
   skipgram_model_url: "1gxVmxa-6jf5wbDBoCyd_VauUuV5wo2Du"
   lightgbm_data_file: "data/processed/dataset_spell_correction.npz"
@@ -15,7 +15,7 @@ model:
 
 skipgram_training:
   batch_size: 512
-  epochs: 10
+  epochs: 25                       # Adjusted: Increase epochs for better Word2Vec vector convergence
   learning_rate: 0.001
 
 ranker_training:
@@ -31,7 +31,7 @@ detector_heuristics:
   hard_floor: -6.26        
 
 candidate_generation:
-  top_k_raw: 2             
+  top_k_raw: 8                     # Adjusted: Expand lookup pool to prevent early filtering of correct candidates
   max_delete_k: 2          
   sub_cost_confusion: 0.4  
   sub_cost_adjacent: 0.5   
@@ -43,14 +43,13 @@ feature_normalization:
   log_norm_bigram: 12.0        
   log_norm_trigram: 12.0       
 
-feature_weights:
-  w_kenlm: 0.30
-  w_edit: 0.25
-  w_len: 0.10
-  w_bigram: 0.20
-  w_trigram: 0.05
-  w_unigram: 0.05
-  w_sim: 0.05
-
+feature_weights:                   # Adjusted: Balanced weighting schema for robust heuristic filtering
+  w_kenlm: 0.25                    # KenLM log-prob impact
+  w_edit: 0.20                     # Telex distance matching
+  w_len: 0.10                      
+  w_bigram: 0.15                   
+  w_trigram: 0.10                  # Increased: Boost trigram relevance for multi-syllable Vietnamese context
+  w_unigram: 0.05                  
+  w_sim: 0.15                      # Increased: Rely more on Skipgram semantic similarity feature
 
 confusion_pairs: {}

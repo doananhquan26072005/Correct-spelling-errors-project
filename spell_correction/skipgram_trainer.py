@@ -13,24 +13,21 @@ from common.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class SkipGram(nn.Module):
 
     def __init__(self, vocab_size, embed_dim):
         super().__init__()
-
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.linear = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, x):
-
         embed = self.embedding(x)
         out = self.linear(embed)
-
         return out
     
+
 class SkipGramTrainer:
-    """Class chịu trách nhiệm quản lý toàn bộ vòng đời của mô hình Word Embedding Skip-gram:
-    Từ tiền xử lý dữ liệu, tạo cặp Center-Context, huấn luyện, đến trích xuất ma trận chuẩn hóa."""
     
     def __init__(self, cfg):
         self.cfg = cfg
@@ -44,21 +41,19 @@ class SkipGramTrainer:
         self.norm_embedding_matrix: np.ndarray = None
         
         logger.info("Initializing SkipGramTrainer...")
-        # Tải tài nguyên ngay khi khởi tạo
         self._load_resources()
 
     def _load_resources(self):
-        """Phương thức nội bộ: Nạp từ điển Vocab và Stopwords từ đường dẫn cấu hình."""
         vocab_path = self.cfg.paths.vocab_file
         stopwords_path = self.cfg.paths.stopwords_file
 
-        logger.info(f"Loading external dictionary components | Vocab: {vocab_path} | Stopwords: {stopwords_path}")
+        logger.info(f"Loading resources | Vocab: {vocab_path} | Stopwords: {stopwords_path}")
         if not os.path.exists(vocab_path):
-            logger.error(f"Vocabulary file missing at path: {vocab_path}")
-            raise FileNotFoundError(f"Không tìm thấy file vocab tại: {vocab_path}")
+            logger.error(f"Vocabulary file missing at: {vocab_path}")
+            raise FileNotFoundError(f"Vocab file not found at: {vocab_path}")
         if not os.path.exists(stopwords_path):
-            logger.error(f"Stopwords file missing at path: {stopwords_path}")
-            raise FileNotFoundError(f"Không tìm thấy file stopwords tại: {stopwords_path}")
+            logger.error(f"Stopwords file missing at: {stopwords_path}")
+            raise FileNotFoundError(f"Stopwords file not found at: {stopwords_path}")
 
         with open(vocab_path, 'r', encoding='utf-8') as f:
             raw_vocab = f.read().splitlines()
@@ -68,20 +63,18 @@ class SkipGramTrainer:
         with open(stopwords_path, 'r', encoding='utf-8') as f:
             self.stopword = set(f.read().splitlines())
             
-        logger.info(f"Resources loaded successfully. Unique Vocab Size: {len(self.vocab):,}")
+        logger.info(f"Resources loaded | Unique Vocab Size: {len(self.vocab):,}")
 
     def build_dataset(self, target_sentences: pd.Series) -> DataLoader:
-        """Xử lý thô văn bản đích và chuyển đổi thành DataLoader chứa các cặp Center-Context."""
         window_size = self.cfg.model.window_size
         batch_size = self.cfg.skipgram_training.batch_size if (self.cfg and hasattr(self.cfg, 'skipgram_training')) else 512
         
-        logger.info(f"Generating Center-Context word training pairs (Window Size: {window_size}, Batch Size: {batch_size})...")
+        logger.info(f"Generating Center-Context pairs | Window: {window_size} | Batch: {batch_size}")
         start_time = time.time()
         skipgram_data = []
 
         for sentence in target_sentences:
             words = str(sentence).lower().split()
-
             filtered_words = [
                 w for w in words 
                 if w in self.word_to_idx and w not in self.stopword
@@ -100,7 +93,7 @@ class SkipGramTrainer:
                         skipgram_data.append((center, context))
 
         elapsed = time.time() - start_time
-        logger.info(f"Dataset generated in {elapsed:.2f}s | Total generated training instances: {len(skipgram_data):,}")
+        logger.info(f"Dataset generated in {elapsed:.2f}s | Total instances: {len(skipgram_data):,}")
         
         centers = torch.LongTensor([pair[0] for pair in skipgram_data])
         contexts = torch.LongTensor([pair[1] for pair in skipgram_data])
@@ -109,7 +102,6 @@ class SkipGramTrainer:
         return DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     def train(self, loader: DataLoader):
-        """Khởi tạo trọng số mạng và kích hoạt vòng lặp huấn luyện chính."""
         vocab_size = len(self.vocab)
         embed_dim = self.cfg.model.embed_dim
         
@@ -124,7 +116,7 @@ class SkipGramTrainer:
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(self.model.parameters(), lr=lr)
         
-        logger.info(f"Activating Skip-gram optimization on hardware: {self.device.upper()} | Total Epochs: {epochs}")
+        logger.info(f"Starting Skip-gram training on: {self.device.upper()} | Total Epochs: {epochs}")
         total_start_time = time.time()
         self.model.train()
 
@@ -152,12 +144,11 @@ class SkipGramTrainer:
             logger.info(f"Epoch {epoch:02d}/{epochs} finished | Avg Loss: {avg_loss:.4f} | Time: {epoch_elapsed:.1f}s")
             
         total_train_time = time.time() - total_start_time
-        logger.info(f"Neural network optimization finished. Total optimization time: {total_train_time:.2f}s")
+        logger.info(f"Training completed successfully in {total_train_time:.2f}s")
         self._extract_and_normalize_embeddings()
 
     def _extract_and_normalize_embeddings(self):
-        """Phương thức nội bộ: Rút trích và thực hiện chuẩn hóa L2 cho ma trận vector từ."""
-        logger.info("Extracting raw embedding matrices and calculating L2 normalizations...")
+        logger.info("Extracting and normalizing embedding matrices...")
         self.model.eval()
         with torch.no_grad():
             self.embedding_weights = self.model.embedding.weight.data.cpu().numpy()
@@ -165,13 +156,12 @@ class SkipGramTrainer:
         norms = np.linalg.norm(self.embedding_weights, axis=1, keepdims=True)
         norms[norms == 0] = 1.0  
         self.norm_embedding_matrix = self.embedding_weights / norms
-        logger.info(f"L2 Normalization matrix secured with structural shape: {self.norm_embedding_matrix.shape}")
+        logger.info(f"L2 normalized matrix secured | shape: {self.norm_embedding_matrix.shape}")
 
     def save_model(self, output_path: str):
-        """Lưu trữ checkpoint mô hình PyTorch và ma trận nén Numpy."""
         if self.model is None:
-            logger.error("Model has not been optimized yet. Aborting serialization.")
-            raise ValueError("Mô hình chưa được huấn luyện. Không thể lưu trữ.")
+            logger.error("Model is not trained yet. Aborting save.")
+            raise ValueError("Model has not been trained. Cannot save checkpoint.")
 
         output_dir = os.path.dirname(output_path)
         if output_dir and not os.path.exists(output_dir):
@@ -184,7 +174,7 @@ class SkipGramTrainer:
             "word_to_idx": self.word_to_idx
         }
         torch.save(checkpoint, output_path)
-        logger.info(f"PyTorch model checkpoint weight dict safely stored at: {output_path}")
+        logger.info(f"Model checkpoint saved at: {output_path}")
 
         matrix_path = output_path.replace(".pth", "_matrix.npz")
         np.savez_compressed(
@@ -193,15 +183,14 @@ class SkipGramTrainer:
             norm_embedding_matrix=self.norm_embedding_matrix,
             vocab=np.array(self.vocab)
         )
-        logger.info(f"Compressed compressed embedding numpy matrix blocks secured at: {matrix_path}")
+        logger.info(f"Compressed numpy embedding matrix saved at: {matrix_path}")
 
     def sanity_check(self, target_word: str, top_k: int = 5):
-        """Kiểm tra nhanh chất lượng không gian vector ngữ nghĩa dựa trên Cosine Similarity."""
         if self.norm_embedding_matrix is None:
-            logger.warning("No normalized matrix structures found. Execution dropped.")
+            logger.warning("No normalized matrix structure found. Skipping sanity check.")
             return
         if target_word not in self.word_to_idx:
-            logger.warning(f"Target verification token '{target_word}' is out of vocabulary (OOV).")
+            logger.warning(f"Target word '{target_word}' is out of vocabulary (OOV).")
             return
 
         word_idx = self.word_to_idx[target_word]
@@ -210,24 +199,22 @@ class SkipGramTrainer:
         scores = np.dot(self.norm_embedding_matrix, word_vector)
         top_indices = np.argsort(scores)[::-1][:top_k + 1]
         
-        logger.info(f"Qualitative Vector Space Sanity Check for token: '{target_word}'")
+        logger.info(f"Vector Space Sanity Check for token: '{target_word}'")
         count = 0
         for idx in top_indices:
             sim_word = self.vocab[idx]
             if sim_word == target_word:
                 continue
-            logger.info(f"  -> NearNeighbor: {sim_word:<15} | Cosine Similarity Score: {scores[idx]:.4f}")
+            logger.info(f"  -> Neighbor: {sim_word:<15} | Cosine Similarity: {scores[idx]:.4f}")
             count += 1
             if count >= top_k:
                 break
     
     def load_model(self, model_path: str):
-        """Tải lại trọng số mô hình và ma trận embedding đã nén từ ổ cứng."""
         matrix_path = model_path.replace(".pth", "_matrix.npz")
-        
         if not os.path.exists(matrix_path):
             logger.error(f"Compressed matrix file not found at: {matrix_path}")
-            raise FileNotFoundError(f"❌ Không tìm thấy file ma trận nén tại: {matrix_path}")
+            raise FileNotFoundError(f"Matrix file not found at: {matrix_path}")
 
         logger.info(f"Loading pre-trained embedding matrices from: {matrix_path}")
         loaded_data = np.load(matrix_path)
@@ -235,18 +222,16 @@ class SkipGramTrainer:
         self.embedding_weights = loaded_data['embedding_matrix']
         self.norm_embedding_matrix = loaded_data['norm_embedding_matrix']
         
-        # Cập nhật lại vocab nếu vocab từ config và file npz có sự sai lệch
         loaded_vocab = loaded_data['vocab'].tolist()
         if len(self.vocab) != len(loaded_vocab):
-            logger.warning("Kích thước vocab hiện tại khác với vocab trong file model. Đang ghi đè bằng vocab của model.")
+            logger.warning("Current vocab size differs from model file. Overriding with model vocab.")
             self.vocab = loaded_vocab
             self.word_to_idx = {word: i for i, word in enumerate(self.vocab)}
 
-        logger.info(f"Successfully loaded L2 normalized embedding matrix with shape: {self.norm_embedding_matrix.shape}")
+        logger.info(f"Loaded L2 normalized embedding matrix | shape: {self.norm_embedding_matrix.shape}")
 
     def get_norm_embedding(self) -> np.ndarray:
-        """Phương thức getter để trích xuất ma trận chuẩn hóa truyền cho các module khác."""
         if self.norm_embedding_matrix is None:
-            logger.error("norm_embedding_matrix is None. Please train or load the model first.")
-            raise ValueError("❌ Ma trận chuẩn hóa chưa được nạp. Hãy gọi train() hoặc load_model() trước.")
+            logger.error("norm_embedding_matrix is None. Model must be trained or loaded first.")
+            raise ValueError("Normalized matrix not loaded. Please train or load model first.")
         return self.norm_embedding_matrix

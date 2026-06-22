@@ -1,4 +1,3 @@
-# diacritic_restoration/trainer.py
 import time
 from typing import Dict
 import torch
@@ -34,16 +33,10 @@ class DiacriticTrainer:
             patience=4,
         )
         self.best_valid_loss = float("inf")
-        logger.info("DiacriticTrainer successfully initialized with tqdm integration.")
+        logger.info("DiacriticTrainer initialized.")
 
     def _weighted_accent_loss(self, logits: torch.Tensor, tgt: torch.Tensor, src: torch.Tensor) -> torch.Tensor:
-        """
-        Cross entropy follow each char, but increase weight for accent characters.
-
-        reason:
-            most chars are copy, if we don't increase accent weight, 
-            can get high char acc by copying a lot, but accent-only acc is still low.
-        """
+        """Cross entropy loss per character with increased weights for accented tokens."""
         vocab_size = logits.size(-1)
         pad_id = self.char_vocab.pad_id
 
@@ -90,7 +83,7 @@ class DiacriticTrainer:
             loss = self._weighted_accent_loss(logits=logits, tgt=tgt, src=src_char)
 
             if torch.isnan(loss) or torch.isinf(loss):
-                logger.error(f"Loss exploded to {loss.item()} at batch {batch_idx}! Terminating gradient step.")
+                logger.error(f"Loss exploded to {loss.item()} at batch {batch_idx}!")
                 raise ValueError("Loss explosion detected.")
 
             self.optimizer.zero_grad()
@@ -103,7 +96,7 @@ class DiacriticTrainer:
 
             pbar.set_postfix({"batch_loss": f"{current_loss:.4f}"})
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 50 == 0:
                 logger.debug(f"Epoch {epoch_idx} | Batch {batch_idx}/{len(loader)} | Loss: {current_loss:.4f}")
 
         avg_loss = total_loss / len(loader)
@@ -132,7 +125,7 @@ class DiacriticTrainer:
     @torch.no_grad()
     def evaluate_dataset(self, test_loader) -> Dict[str, float]:
         self.model.eval()
-        logger.info("Executing End-to-End evaluation process on test dataset...")
+        logger.info("Evaluating on test dataset...")
         
         all_inputs = []
         all_preds = []
@@ -159,19 +152,17 @@ class DiacriticTrainer:
 
         metrics = compute_text_metrics(all_inputs, all_preds, all_targets)
 
-        logger.info("==================== TEST SET PERFORMANCE METRICS ====================")
-        logger.info(f"  • Char accuracy        : {metrics['char_accuracy']:.4f}")
-        logger.info(f"  • Word accuracy        : {metrics['word_accuracy']:.4f}")
-        logger.info(f"  • Accent-only accuracy : {metrics['accent_only_accuracy']:.4f}")
-        logger.info(f"  • Exact match (SER)    : {metrics['exact_match']:.4f}")
-        logger.info(f"  • CER                  : {metrics['cer']:.4f}")
-        logger.info("======================================================================")
+        logger.info("Test Performance Metrics:")
+        logger.info(f"  > Char accuracy        : {metrics['char_accuracy']:.4f}")
+        logger.info(f"  > Word accuracy        : {metrics['word_accuracy']:.4f}")
+        logger.info(f"  > Accent-only accuracy : {metrics['accent_only_accuracy']:.4f}")
+        logger.info(f"  > Exact match (SER)    : {metrics['exact_match']:.4f}")
+        logger.info(f"  > CER                  : {metrics['cer']:.4f}")
             
         return metrics
 
     def fit(self, train_loader, valid_loader, test_loader=None) -> nn.Module:
-        logger.info(f"Starting model optimization pipeline. Total epochs: {self.cfg.training.epochs}")
-        
+        logger.info(f"Starting training loop. Total epochs: {self.cfg.training.epochs}")
         start_total_time = time.time()
 
         for epoch in range(1, self.cfg.training.epochs + 1):
@@ -189,7 +180,7 @@ class DiacriticTrainer:
             )
 
             if valid_loss < self.best_valid_loss:
-                logger.info(f"Valid loss decreased from {self.best_valid_loss:.4f} to {valid_loss:.4f}. Saving checkpoint...")
+                logger.info(f"Valid loss decreased ({self.best_valid_loss:.4f} -> {valid_loss:.4f}). Saving checkpoint...")
                 self.best_valid_loss = valid_loss
                 checkpoint_data = {
                     "model_state_dict": self.model.state_dict(),
@@ -203,23 +194,19 @@ class DiacriticTrainer:
                 torch.save(checkpoint_data, self.cfg.training.checkpoint_path)
 
         total_train_time = time.time() - start_total_time
-
         hours = int(total_train_time // 3600)
         minutes = int((total_train_time % 3600) // 60)
         seconds = int(total_train_time % 60)
         
-        logger.info("======================================================================")
-        logger.info(f"[*] TRAINING CYCLE FINISHED.")
-        logger.info(f"    > Total Training Time: {hours:02d}:{minutes:02d}:{seconds:02d} ({total_train_time:.2f} seconds)")
-        logger.info("======================================================================")
+        logger.info(f"Training completed in {hours:02d}:{minutes:02d}:{seconds:02d} ({total_train_time:.2f}s).")
 
         if test_loader is not None:
-            logger.info("Activating automatic test evaluation on best secured checkpoint model...")
+            logger.info("Evaluating best checkpoint on test set...")
             try:
                 best_checkpoint = torch.load(self.cfg.training.checkpoint_path, map_location=self.cfg.training.device, weights_only=False)
                 self.model.load_state_dict(best_checkpoint["model_state_dict"])
                 self.evaluate_dataset(test_loader)
             except Exception:
-                logger.error("Failed to load the best saved checkpoint for test evaluation.", exc_info=True)
+                logger.error("Failed to evaluate best checkpoint.", exc_info=True)
 
         return self.model

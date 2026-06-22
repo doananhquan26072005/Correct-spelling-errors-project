@@ -18,18 +18,16 @@ logger = get_logger(__name__)
 
 
 class LightGBMRankerTrainer:
-    """Class quản lý toàn bộ vòng đời cấu hình, huấn luyện, trích xuất dữ liệu 
-    và đóng gói mô hình xếp hạng ứng viên (LightGBM LambdaRanker)."""
     
     def __init__(self, 
                  abbr_processor: AbbreviationProcessor, 
                  evaluator: Evaluator, 
-                 generator: CandidateGenerator, # <-- BỔ SUNG Ở ĐÂY ĐỂ TRÁNH LỖI ATTRIBUTE ERROR
+                 generator: CandidateGenerator, 
                  feature_extractor: FeatureExtractor, 
                  cfg):
         self.abbr_processor = abbr_processor
         self.evaluator = evaluator
-        self.generator = generator              # <-- BỔ SUNG Ở ĐÂY
+        self.generator = generator  
         self.feature_extractor = feature_extractor
         self.cfg = cfg
         self.ranker = None
@@ -42,23 +40,19 @@ class LightGBMRankerTrainer:
         stopwords: set,
         max_negatives: int = 20
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """
-        Trích xuất đặc trưng và xây dựng tập dữ liệu huấn luyện (X, y, group) từ DataFrame.
-        """
-        logger.info("Bắt đầu xây dựng tập dữ liệu huấn luyện (Feature Extraction)...")
+        logger.info("Building dataset and extracting features...")
         
         X_train_list = []
         y_train_list = []
         group_train_list = []
 
-        for idx, row in tqdm(df_train.iterrows(), total=len(df_train), desc="Trích xuất đặc trưng"):
+        pbar = tqdm(df_train.iterrows(), total=len(df_train), desc="Extracting Features")
+        for idx, row in pbar:
             input_sent = str(row['input'])
             target_sent = str(row['target'])
 
-            # Tiền xử lý chữ viết tắt
             input_sent = self.abbr_processor.replace_abbreviations(input_sent)
             
-            # Tìm lỗi sai và vị trí
             error_pairs, error_indices = self.evaluator.find_misspelled_words_and_targets(
                 input_sent, 
                 target_sent, 
@@ -68,19 +62,17 @@ class LightGBMRankerTrainer:
             if not error_pairs:
                 continue 
                 
-            # Tách thành mảng token ngay từ đầu để truyền vào hàm
             sentence_words = input_sent.split()
                 
             for i in range(len(error_indices)):
                 error_word, correct_word = error_pairs[i]
 
-                # Trích xuất ứng viên và vector đặc trưng qua hàm điều phối
                 candidates_with_scores = extract_candidates_and_features(
                     error_word=error_word, 
                     sentence_words=sentence_words, 
                     error_idx=error_indices[i], 
                     error_indices=error_indices,
-                    generator=self.generator,           # Đã có self.generator từ __init__
+                    generator=self.generator,           
                     extractor=self.feature_extractor,
                     stopwords=stopwords,
                     cfg=self.cfg
@@ -89,7 +81,6 @@ class LightGBMRankerTrainer:
                 if not candidates_with_scores:
                     continue
 
-                # Tách riêng từ đúng (Positive) và từ sai (Negative)
                 positives = []
                 negatives = []
 
@@ -99,14 +90,10 @@ class LightGBMRankerTrainer:
                     else:
                         negatives.append((candidate_word, feature_vector))
 
-                # Nếu không lấy được từ đúng -> Bỏ qua toàn bộ Group lỗi này
                 if not positives:
                     continue 
 
-                # Lấy tối đa N từ sai có điểm Heuristic cao nhất (khó phân biệt nhất)
                 hard_negatives = negatives[:max_negatives]
-
-                # Gộp từ đúng và các từ sai khó nhất lại thành danh sách training cho group này
                 final_candidates = positives + hard_negatives
 
                 group_X = []
@@ -117,46 +104,36 @@ class LightGBMRankerTrainer:
                     group_X.append(feat)
                     group_y.append(label)
 
-                # Cập nhật vào mảng tổng của mô hình
                 X_train_list.extend(group_X)
                 y_train_list.extend(group_y)
-
-                # Báo cho LightGBM biết Group này có bao nhiêu ứng viên
                 group_train_list.append(len(final_candidates))
 
-                # In-place Update cho từ lỗi tiếp theo
                 if error_indices[i] < len(sentence_words):
                     sentence_words[error_indices[i]] = correct_word
 
-        # Chuyển đổi sang numpy array để tương thích trực tiếp với LightGBM
         X_train = np.array(X_train_list)
         y_train = np.array(y_train_list)
         group_train = np.array(group_train_list)
 
-        logger.info(
-            f"Dataset xây dựng thành công | X_train: {X_train.shape} | "
-            f"Tổng số query groups: {len(group_train):,}"
-        )
+        logger.info(f"Dataset built successfully | X_train: {X_train.shape} | Query groups: {len(group_train):,}")
         return X_train, y_train, group_train
 
     def load_training_data(self, data_path: str) -> tuple:
-        """Đọc tập dữ liệu trích xuất đặc trưng (.npz) được chuẩn bị sẵn."""
         if not os.path.exists(data_path):
             logger.error(f"Feature dataset not discovered at path target: {data_path}")
-            raise FileNotFoundError(f"❌ Không tìm thấy tệp dữ liệu huấn luyện tại: {data_path}")
+            raise FileNotFoundError(f"Training data file not found at: {data_path}")
             
-        logger.info(f"Loading engineered feature matrix files from: {data_path}")
+        logger.info(f"Loading feature matrices from: {data_path}")
         loaded_data = np.load(data_path)
         X_train = loaded_data['X_train']
         y_train = loaded_data['y_train']
         group_train = loaded_data['group_train']
         
-        logger.info(f"Data matrices successfully loaded | X_train shape: {X_train.shape} | Total Query Groups: {len(group_train):,}")
+        logger.info(f"Data matrices loaded | X_train shape: {X_train.shape} | Query Groups: {len(group_train):,}")
         return X_train, y_train, group_train
 
     def train(self, X_train: np.ndarray, y_train: np.ndarray, group_train: np.ndarray) -> lgb.LGBMRanker:
-        """Khởi tạo cấu hình và kích hoạt chu trình huấn luyện mô hình Ranker."""
-        logger.info("Configuring LightGBM LambdaRanker core specifications...")
+        logger.info("Configuring LightGBM LambdaRanker specifications...")
         
         if self.cfg and hasattr(self.cfg, 'ranker_training'):
             r_train = self.cfg.ranker_training
@@ -183,19 +160,18 @@ class LightGBMRankerTrainer:
             random_state=random_state
         )
 
-        logger.info("Fitting LightGBMRanker on feature datasets...")
+        logger.info("Fitting LightGBMRanker on dataset...")
         start_time = time.time()
         self.ranker.fit(
             X=X_train,
             y=y_train,
             group=group_train
         )
-        logger.info(f"LightGBM ranking estimator optimization completed in {time.time() - start_time:.2f}s.")
+        logger.info(f"Ranker training completed in {time.time() - start_time:.2f}s.")
         self._log_feature_importances()
         return self.ranker
 
     def _log_feature_importances(self):
-        """Phương thức nội bộ: Thống kê và hiển thị mức độ đóng góp của từng đặc trưng."""
         if self.ranker is None:
             return
             
@@ -210,27 +186,25 @@ class LightGBMRankerTrainer:
         logger.info("=======================================================================")
 
     def save_model(self, model_path: str):
-        """Lưu trữ mô hình đã huấn luyện ra file text của LightGBM."""
         if self.ranker is None:
-            logger.error("Ranker estimator has no optimized parameter trees. Aborting.")
-            raise ValueError("❌ Mô hình chưa được huấn luyện. Không thể lưu checkpoint.")
+            logger.error("Ranker model is not trained yet. Aborting save.")
+            raise ValueError("Model has not been trained. Cannot save checkpoint.")
         
         output_dir = os.path.dirname(model_path)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
 
         self.ranker.booster_.save_model(model_path)
-        logger.info(f"LightGBM ranker booster model trees secured text-file format at: {model_path}")
+        logger.info(f"LightGBM ranker model saved successfully at: {model_path}")
 
     def load_model(self, model_path: str) -> lgb.LGBMRanker:
-        """Tải mô hình từ checkpoint có sẵn để phục vụ cho Inference/Evaluation nhanh."""
         if not os.path.exists(model_path):
-            logger.error(f"LightGBM configuration text file not found at: {model_path}")
-            raise FileNotFoundError(f"❌ Không tìm thấy checkpoint mô hình tại: {model_path}")
+            logger.error(f"LightGBM model text file not found at: {model_path}")
+            raise FileNotFoundError(f"Model checkpoint not found at: {model_path}")
             
-        logger.info(f"Loading pre-compiled LightGBM ranker assets from: {model_path}")
+        logger.info(f"Loading LightGBM ranker from: {model_path}")
         bst = lgb.Booster(model_file=model_path)
         self.ranker = lgb.LGBMRanker()
         self.ranker.booster_ = bst
-        logger.info("LightGBM ranker components re-activated successfully.")
+        logger.info("LightGBM ranker activated successfully.")
         return self.ranker

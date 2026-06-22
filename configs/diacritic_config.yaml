@@ -11,12 +11,12 @@ data:
 # Vocabulary configuration
 vocab:
   max_word_vocab_size: 50000
-  min_word_freq: 1
+  min_word_freq: 2          # Adjusted: Filter out low-frequency noise/typos
 
 # Data Generation / Augmentation
 augmentation:
   lowercase: true
-  use_word_pairs: false
+  use_word_pairs: true      # Adjusted: Enable word pairs to strengthen dictionary context
   max_word_pairs: 30000
   use_sentence_chunks: true
   chunk_min_words: 5
@@ -33,14 +33,14 @@ model:
   nhead: 4
   num_encoder_layers: 4
   dim_feedforward: 768
-  dropout: 0.2
+  dropout: 0.15             # Adjusted: Slightly reduced to prevent underfitting in small networks
 
 # Hyperparameters & Training Settings
 training:
-  batch_size: 64
-  epochs: 80
-  learning_rate: 1.0e-4
-  weight_decay: 1.0e-4
+  batch_size: 128           # Adjusted: Scale to 128 if VRAM allows for smoother gradients
+  epochs: 60                # Adjusted: 60 epochs is usually sufficient with adaptive LR scheduling
+  learning_rate: 3.0e-4     # Adjusted: Faster initial convergence for AdamW
+  weight_decay: 1.0e-2      # Adjusted: Standard AdamW weight decay instead of 1e-4
   grad_clip: 1.0
   seed: 42
   checkpoint_path: "models/accent_tagger_context_v3.pt"
@@ -49,5 +49,5 @@ training:
 # Loss & Constraints
 loss:
   copy_loss_weight: 1.0
-  accent_loss_weight: 10.0
+  accent_loss_weight: 4.0   # Adjusted: Balanced ratio to mitigate over-correction tendency
   use_constraint_in_training: true

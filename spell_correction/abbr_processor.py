@@ -5,15 +5,14 @@ from common.logger import get_logger
 logger = get_logger(__name__)
 
 class AbbreviationProcessor:
-    """Chịu trách nhiệm nạp và xử lý thay thế các từ viết tắt/teencode."""
     def __init__(self, teen_code_path: str):
         self.abbreviation_dict: Dict[str, str] = {}
-        logger.info(f"Initializing AbbreviationProcessor with dictionary target: {teen_code_path}")
+        logger.info(f"Initializing AbbreviationProcessor with dict: {teen_code_path}")
         self._load_dictionary(teen_code_path)
         
     def _load_dictionary(self, path: str):
         if not os.path.exists(path):
-            logger.warning(f"Teencode map file NOT found at '{path}'. Skipping loading sequence.")
+            logger.warning(f"Teencode file not found at '{path}'. Skipping load.")
             return
             
         with open(path, 'r', encoding='utf-8') as f:
@@ -26,7 +25,7 @@ class AbbreviationProcessor:
                     shortcut = parts[0].lower()
                     full_word = parts[1].lower()
                     self.abbreviation_dict[shortcut] = full_word
-        logger.info(f"Successfully mapped {len(self.abbreviation_dict):,} teencode shorthand conversion pairs.")
+        logger.info(f"Loaded {len(self.abbreviation_dict):,} teencode pairs.")
 
     def replace_abbreviations(self, sentence: str) -> str:
         words = sentence.lower().split()
@@ -34,10 +33,9 @@ class AbbreviationProcessor:
         for i, word in enumerate(words):
             if word in self.abbreviation_dict:
                 if len(self.abbreviation_dict[word].split()) == 1:
-                    # logger.debug(f"Teencode replacement matched: '{word}' -> '{self.abbreviation_dict[word]}'")
+                    logger.debug(f"Teencode match: '{word}' -> '{self.abbreviation_dict[word]}'")
                     words[i] = self.abbreviation_dict[word]
                     replaced_count += 1
-        # if replaced_count > 0:
-        #     logger.debug(f"Total shorthand replacements executed in sentence: {replaced_count}")
+        if replaced_count > 0:
+            logger.debug(f"Executed {replaced_count} shorthand replacements in sentence.")
         return " ".join(words)
-        

@@ -4,9 +4,9 @@ from common.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class Visualizer:
     def __init__(self, pipeline, abbr_engine, evaluator, word_to_idx):
-        """Class hỗ trợ phân loại và đánh giá trực quan kết quả sửa lỗi của hệ thống."""
         self.pipeline = pipeline
         self.abbr_engine = abbr_engine
         self.evaluator = evaluator
@@ -14,8 +14,7 @@ class Visualizer:
         logger.info("Visualizer module online for qualitative output sampling.")
 
     def analyze_predictions(self, validation_df, stopwords, num_samples=200):
-        """Quét qua tập dữ liệu kiểm thử, chạy pipeline và phân loại câu/từ."""
-        logger.info(f"Sampling {num_samples} validation queries for visual performance breakdown...")
+        logger.info(f"Sampling {num_samples} validation queries for performance breakdown...")
         
         exact_sentences = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
         error_sentence = pd.DataFrame(columns=['Input', 'Fixed', 'Target'])
@@ -37,7 +36,7 @@ class Visualizer:
             fixed_tokens = fixed_sentence_str.split()
 
             if len(target_tokens) != len(fixed_tokens):
-                logger.debug(f"Visualizer down-dropped uneven structural split sentence: {input_sent}")
+                logger.debug(f"Dropped sentence due to token length mismatch: {input_sent}")
                 continue
 
             errors_in_sentence = 0
@@ -52,5 +51,5 @@ class Visualizer:
             if errors_in_sentence != 0:
                 error_sentence.loc[error_sentence.shape[0]] = [input_sent, fixed_sentence_str, target_sent]
 
-        logger.info(f"Visualization evaluation completed | Exact sentences: {len(exact_sentences)} | Sentences with errors: {len(error_sentence)}")
+        logger.info(f"Analysis completed | Exact sentences: {len(exact_sentences)} | Sentences with errors: {len(error_sentence)}")
         return exact_sentences, error_sentence, error_words

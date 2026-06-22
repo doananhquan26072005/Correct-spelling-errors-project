@@ -7,9 +7,7 @@ from common.logger import get_logger
 logger = get_logger(__name__)
 
 class CandidateGenerator:
-    """Chịu trách nhiệm quản lý Symmetric Delete và tra cứu ứng viên từ vựng sơ bộ."""
     
-    # Hằng số cấu hình bàn phím vật lý QWERTY (Cố định, không đổi)
     _ADJACENT_KEYS: Dict[str, str] = {
         'q': 'wea', 'w': 'qeasd', 'e': 'wrsdf', 'r': 'etdfg', 't': 'ryfgh', 'y': 'tughj', 'u': 'yihjk', 'i': 'uojkl', 'o': 'ipkl', 'p': 'ol',
         'a': 'qwsz', 's': 'weadzx', 'd': 'ersfxc', 'f': 'rtdgcv', 'g': 'tyfhvb', 'h': 'yugjbn', 'j': 'uihknm', 'k': 'iojlm', 'l': 'opk',
@@ -26,7 +24,7 @@ class CandidateGenerator:
         self.counts_2 = Counter()
         self.counts_3 = Counter()
         
-        logger.info("Building internal Symmetric Delete inverted index framework...")
+        logger.info("Building Symmetric Delete inverted index...")
         start_time = time.time()
         self._build_symmetric_delete_dictionary()
         logger.info(f"Symmetric Delete index compiled successfully in {time.time() - start_time:.2f}s.")
@@ -35,7 +33,7 @@ class CandidateGenerator:
         word = word.lower()
         prefix, vowel_base, suffix, word_tone, word_mod = "", "", "", "", ""
         VOWELS = "aeiouy"
-        state = 0  # 0: phụ âm đầu, 1: nguyên âm
+        state = 0
 
         i = 0
         while i < len(word):
@@ -114,10 +112,9 @@ class CandidateGenerator:
                 for variant in variant_list:
                     if word not in self.sym_dict[variant]:
                         self.sym_dict[variant].append(word)
-        logger.debug(f"Total distinct keys loaded into sym_dict inverted index: {len(self.sym_dict):,}")
+        logger.debug(f"Total distinct keys loaded in sym_dict: {len(self.sym_dict):,}")
 
     def compute_edit_distance(self, s1: str, s2: str, confusion_pairs: Set[Tuple[str, str]]) -> float:
-        """Tính khoảng cách Damerau-Levenshtein có hiệu chỉnh trọng số bàn phím và vùng miền."""
         if self.cfg and hasattr(self.cfg, 'candidate_generation'):
             c_gen = self.cfg.candidate_generation
             cost_confusion = c_gen.sub_cost_confusion
@@ -146,16 +143,14 @@ class CandidateGenerator:
                     sub_cost = 1.0
 
                 dp[i][j] = min(
-                    dp[i - 1][j] + 1,                  # Xóa
-                    dp[i][j - 1] + 1,                  # Thêm
-                    dp[i - 1][j - 1] + sub_cost        # Thay thế
+                    dp[i - 1][j] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j - 1] + sub_cost
                 )
 
-                # Phép đổi chỗ ký tự kế cận (Transposition)
                 if i > 1 and j > 1 and s1[i - 1] == s2[j - 2] and s1[i - 2] == s2[j - 1]:
                     dp[i][j] = min(dp[i][j], dp[i - 2][j - 2] + cost_transposition)
 
-                # Các trường hợp tổ hợp âm lỗi chính tả tiếng Việt ghép 2 ký tự
                 if i >= 2 and j >= 2 and (s1[i-2:i], s2[j-2:j]) in confusion_pairs:
                     dp[i][j] = min(dp[i][j], dp[i-2][j-2] + cost_confusion)
                 if i >= 2 and j >= 1 and (s1[i-2:i], s2[j-1:j]) in confusion_pairs:
@@ -166,7 +161,6 @@ class CandidateGenerator:
         return dp[n][m]
 
     def compute_edit_distance_telex(self, s1: str, s2: str, confusion_pairs: Set[Tuple[str, str]]) -> float:
-        """Tìm khoảng cách chỉnh sửa nhỏ nhất giữa mọi tổ hợp biến thể Telex của hai chuỗi."""
         min_dist = float('inf')
         string1 = self.create_telex_form(s1)
         string2 = self.create_telex_form(s2)
@@ -179,7 +173,7 @@ class CandidateGenerator:
         return min_dist
 
     def fit_ngram_counts(self, train_targets: pd.Series):
-        logger.info("Computing Uni/Bi/Tri-gram contextual background frequency tables...")
+        logger.info("Computing N-gram frequency tables...")
         start_time = time.time()
         
         for sentence in train_targets:
@@ -195,7 +189,7 @@ class CandidateGenerator:
             self.counts_3.update(trigrams)
             
         logger.info(
-            f"N-gram frequency mappings generated in {time.time() - start_time:.2f}s | "
+            f"N-gram generated in {time.time() - start_time:.2f}s | "
             f"Unigrams: {len(self.counts_1):,} | Bigrams: {len(self.counts_2):,} | Trigrams: {len(self.counts_3):,}"
         )
 
@@ -228,7 +222,5 @@ class CandidateGenerator:
 
         result = sorted(candidates.items(), key=lambda x: (x[1][0], -x[1][1]))
         candidate_words = [cand_word for cand_word, _ in result]
-        # logger.debug(f"Lookup for suspect '{word}': Generated {len(candidate_words)} early-stage candidate structures.")
+        logger.debug(f"Lookup for '{word}': Generated {len(candidate_words)} candidate structures.")
         return candidate_words
-
-    

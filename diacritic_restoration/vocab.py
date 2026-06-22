@@ -1,4 +1,3 @@
-# diacritic_restoration/vocab.py
 import json
 import time
 from collections import Counter
@@ -21,7 +20,7 @@ class CharVocab:
         self.itos: Dict[int, str] = {}
 
     def build(self, texts: List[str]):
-        logger.debug("Building CharVocab from scratch...")
+        logger.debug("Building CharVocab from texts...")
         chars = set()
         for text in texts:
             for ch in str(text):
@@ -30,7 +29,7 @@ class CharVocab:
         vocab = self.special_tokens + sorted(chars)
         self.stoi = {token: idx for idx, token in enumerate(vocab)}
         self.itos = {idx: token for token, idx in self.stoi.items()}
-        logger.info(f"CharVocab successfully built. Total tokens: {len(self.stoi):,}")
+        logger.info(f"CharVocab built successfully | size: {len(self.stoi):,}")
 
     @property
     def pad_id(self):
@@ -89,20 +88,20 @@ class WordVocab:
         return len(self.stoi)
 
     def build(self, texts: List[str], max_size: int, min_freq: int):
-        logger.debug(f"Building WordVocab (max_size={max_size}, min_freq={min_freq})...")
+        logger.debug(f"Building WordVocab | max_size: {max_size} | min_freq: {min_freq}")
         counter = Counter()
         for text in texts:
             for word in str(text).split():
                 counter[word] += 1
                 
         words = [w for w, c in counter.most_common() if c >= min_freq]
-        logger.debug(f"Words meeting min_freq={min_freq} criterion: {len(words):,}")
+        logger.debug(f"Words meeting min_freq validation: {len(words):,}")
         
         words = words[:max_size]
         vocab = self.special_tokens + words
         self.stoi = {token: idx for idx, token in enumerate(vocab)}
         self.itos = {idx: token for token, idx in self.stoi.items()}
-        logger.info(f"WordVocab successfully built. Total tokens: {len(self.stoi):,}")
+        logger.info(f"WordVocab built successfully | size: {len(self.stoi):,}")
 
 
 def encode_word_ids_per_char(text: str, word_vocab: WordVocab, max_len: int) -> List[int]:
@@ -138,7 +137,7 @@ def build_word_vocab(train_df: pd.DataFrame, cfg) -> WordVocab:
         max_size=cfg.vocab.max_word_vocab_size,
         min_freq=cfg.vocab.min_word_freq,
     )
-    logger.info(f"Final initialized WordVocab size: {len(word_vocab):,}")
+    logger.info(f"WordVocab finalized | size: {len(word_vocab):,}")
     return word_vocab
 
 
@@ -146,7 +145,7 @@ def build_vocab_from_words_file_and_dataframe(df: pd.DataFrame, cfg) -> CharVoca
     vocab = CharVocab()
     words_texts = []
     
-    logger.info(f"Attempting to read custom words file from: {cfg.data.words_path}")
+    logger.info(f"Reading words file from: {cfg.data.words_path}")
     try:
         with open(cfg.data.words_path, "r", encoding="utf-8") as f:
             for line_idx, line in enumerate(f, 1):
@@ -159,34 +158,33 @@ def build_vocab_from_words_file_and_dataframe(df: pd.DataFrame, cfg) -> CharVoca
                     if word:
                         words_texts.append(word)
                 except json.JSONDecodeError:
-                    logger.debug(f"JSONDecodeError skipped at {cfg.data.words_path} line {line_idx}")
+                    logger.debug(f"JSONDecodeError at line {line_idx} in {cfg.data.words_path}")
                     continue
-        logger.info(f"Successfully loaded words from external file: {len(words_texts):,} unique entries.")
+        logger.info(f"Loaded external words dictionary: {len(words_texts):,} entries.")
     except FileNotFoundError:
-        logger.warning(f"Words file NOT found at '{cfg.data.words_path}'. Building vocabulary solely using Dataframe.")
+        logger.warning(f"Words file not found at '{cfg.data.words_path}'. Fallback to DataFrame only.")
 
     df_texts = (
         df[cfg.data.input_col].astype(str).tolist()
         + df[cfg.data.target_col].astype(str).tolist()
     )
 
-    logger.info("Extracting distinct characters from aggregated text components...")
+    logger.info("Extracting unique characters from aggregated dataset...")
     vocab.build(words_texts + df_texts)
-    logger.info(f"Final initialized CharVocab size: {len(vocab):,}")
+    logger.info(f"CharVocab finalized | size: {len(vocab):,}")
     return vocab
 
 
 def build_allowed_token_mask(vocab: CharVocab, cfg) -> torch.Tensor:
     """
-    allowed_mask[input_id, output_id] = True if output token is a valid
-    accented form of input token.
+    Generates mask where allowed_mask[input_id, output_id] = True if output token 
+    is a valid accented form of input token.
 
     Examples:
         o -> o, ò, ó, ỏ, õ, ọ, ô, ồ, ố, ..., ơ, ờ, ớ, ...
         d -> d, đ
-        t -> t only
     """
-    logger.info("Generating allowed diacritic token token mask tensor...")
+    logger.info("Generating allowed diacritic token mask tensor...")
     start_time = time.time()
     
     vocab_size = len(vocab)
@@ -210,9 +208,8 @@ def build_allowed_token_mask(vocab: CharVocab, cfg) -> torch.Tensor:
             if output_base == input_base:
                 allowed[input_id, output_id] = True
 
-    # Đo thời gian sinh ma trận ràng buộc
     elapsed = time.time() - start_time
     logger.info(f"Allowed token mask matrix built successfully in {elapsed:.4f}s.")
-    logger.debug(f"Mask matrix properties - Shape: {allowed.shape} | Device: {cfg.training.device}")
+    logger.debug(f"Mask matrix properties | Shape: {allowed.shape} | Device: {cfg.training.device}")
 
     return allowed.to(cfg.training.device)

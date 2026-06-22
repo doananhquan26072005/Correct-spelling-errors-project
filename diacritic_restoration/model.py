@@ -1,4 +1,3 @@
-# diacritic_restoration/models.py
 import math
 import torch
 import torch.nn as nn
@@ -27,20 +26,14 @@ class PositionalEncoding(nn.Module):
             pe[:, 1::2] = torch.cos(position * div_term[:-1])
 
         self.register_buffer("pe", pe.unsqueeze(0))
-        logger.debug(f"PositionalEncoding initialized with max_len={max_len}, d_model={d_model}")
+        logger.debug(f"PositionalEncoding initialized | max_len: {max_len} | d_model: {d_model}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.dropout(x + self.pe[:, : x.size(1), :])
 
 
 class ContextAwareAccentTagger(nn.Module):
-    """
-    Char-level sequence labeling with word-level context.
-
-    Each character receives:
-        char embedding + word embedding of the word it belongs to.
-    Then Transformer self-attention learns context over the whole sentence.
-    """
+    """Char-level sequence labeling with word-level context via embedding concatenation."""
     
     def __init__(self, char_vocab_size: int, word_vocab_size: int, char_pad_id: int, word_pad_id: int, cfg):
         super().__init__()
@@ -69,12 +62,10 @@ class ContextAwareAccentTagger(nn.Module):
         )
 
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=cfg.model.num_encoder_layers)
-        
         self.output_layer = nn.Linear(cfg.model.d_model, char_vocab_size)
         
         logger.info(
-            f"ContextAwareAccentTagger architecture initialized | "
-            f"Char Emb: {cfg.model.char_emb_dim} | Word Emb: {cfg.model.word_emb_dim} | "
+            f"Model initialized | Char Emb: {cfg.model.char_emb_dim} | Word Emb: {cfg.model.word_emb_dim} | "
             f"Heads: {cfg.model.nhead} | Layers: {cfg.model.num_encoder_layers}"
         )
 
@@ -91,11 +82,12 @@ class ContextAwareAccentTagger(nn.Module):
         x = self.encoder(x, src_key_padding_mask=padding_mask)
         logits = self.output_layer(x)
 
+        logger.debug(f"Forward pass completed | output shape: {logits.shape}")
         return logits
 
 
 def build_model(char_vocab: CharVocab, word_vocab: WordVocab, cfg) -> nn.Module:
-    logger.info(f"Building ContextAwareAccentTagger model on device: {cfg.training.device}")
+    logger.info(f"Building model on device: {cfg.training.device}")
     
     try:
         model = ContextAwareAccentTagger(
@@ -109,11 +101,11 @@ def build_model(char_vocab: CharVocab, word_vocab: WordVocab, cfg) -> nn.Module:
         total_params = sum(p.numel() for p in model.parameters())
         trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-        logger.info(f"Model built successfully!")
+        logger.info("Model built successfully.")
         logger.info(f"  > Total parameters    : {total_params:,}")
         logger.info(f"  > Trainable parameters: {trainable_params:,}")
         
         return model
     except Exception as e:
-        logger.error("Failed to build or allocate the model to the specified device.", exc_info=True)
+        logger.error("Failed to build or allocate model.", exc_info=True)
         raise e

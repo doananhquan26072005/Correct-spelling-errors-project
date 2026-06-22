@@ -1,395 +1,368 @@
-ctrai	con trai
-khôg	không
-bme	bố mẹ
-cta	chúng ta
-mih	mình
-mqh	mối quan hệ
-cgai	con gái
-nhữg	những
-mng	mọi người
-svtn	sinh viên tình nguyện
-r	rồi
-qtam	quan tâm
-thươg	thương
-qtâm	quan tâm
-chug	chung
-trườg	trường
-thoy	thôi
-đki	đăng ký
-atsm	ảo tưởng sức mạnh
-ạk	ạ
-cv	công việc
-vch	vãi chưởng
-cùg	cùng
-pn	bạn
-pjt	biết
-thjk	thích
-keke	ce ce
-ktra	kiểm tra
-nek	nè
-cgái	con gái
-nthe	như thế
-chúg	chúng
-kái	cái
-tìh	tình
-phòg	phòng
-lòg	lòng
-từg	từng
-rằg	rằng
-sốg	sống
-thuj	thôi
-thuơng	thương
-càg	càng
-đky	đăng ký
-bằg	bằng
-sviên	sinh viên
-ák	á
-đág	đáng
-nvay	như vậy
-nhjeu	nhiều
-xg	xuống
-zồi	rồi
-trag	trang
-zữ	dữ
-atrai	anh trai
-kte	kinh tế
-độg	động
-lmht	liên minh huyền thoại
-gắg	gắng
-đzai	đẹp trai
-thgian	thời gian
-plz	pờ ly
-đồg	đồng
-btrai	bạn trai
-nthê	như thế
-hìhì	hì hì
-vọg	vọng
-hihe	hi he
-đôg	đông
-răg	răng
-thườg	thường
-tcảm	tình cảm
-đứg	đứng
-ksao	không sao
-dz	đẹp trai
-hjxhjx	hix hix
-cmày	chúng mày
-xuốg	xuống
-nkư	như
-lquan	liên quan
-tiếg	tiếng
-hajz	hai
-xih	xinh
-hìh	hình
-thàh	thành
-ngke	nghe
-dzậy	dậy
-teencode	tin cốt
-tnào	thế nào
-tưởg	tưởng
-ctrinh	chương trình
-phog	phong
-hôg	không
-zìa	gì
-kũg	cũng
-ntnao	như thế nào
-trọg	trọng
-nthế	như thế
-năg	năng
-ngđó	người đó
-lquen	làm quen
-riêg	riêng
-ngag	ngang
-hêhê	hê hê
-bnhiu	bao nhiêu
-ngốk	ngốc
-kậu	cậu
-highland	hai lừn
-kqua	kết quả
-htrc	hôm trước
-địh	định
-gđình	gia đinh
-giốg	giống
-csống	cuộc sống
-xug	xùng
-zùi	rồi
-bnhiêu	bao nhiêu
-cbị	chuẩn bị
-kòn	còn
-buôg	buông
-csong	cuộc sống
-chàg	chàng
-chăg	chăng
-ngàh	ngành
-llac	liên lạc
-nkưng	nhưng
-nắg	nắng
-tíh	tính
-khoảg	khoảng
-thík	thích
-ngđo	người đó
-ngkhác	người khác
-thẳg	thẳng
-kảm	cảm
-dàh	dành
-júp	giúp
-lặg	lặng
-vđê	vấn đề
-bbè	bạn bè
-bóg	bóng
-dky	đăng ký
-dòg	dòng
-uốg	uống
-tyêu	tình yêu
-snvv	sinh nhật vui vẻ
-đthoại	điện thoại
-qhe	quan hệ
-cviec	công việc
-tượg	tượng
-qà	quà
-thjc	thích
-nhưq	nhưng
-cđời	cuộc đời
-bthường	bình thường
-zà	già
-đáh	đánh
-xloi	xin lỗi
-zám	dám
-qtrọng	quan trọng
-bìh	bình
-lzi	làm gì
-qhệ	quan hệ
-đhbkhn	đại học bách khoa hà nội
-hajzz	hai
-kủa	của
-lz	làm gì
-đhkhtn	đại học khoa học tự nhiên
-đóg	đóng
-cka	cha
-lgi	làm gì
-nvậy	như vậy
-qả	quả
-đkiện	điều kiện
-nèk	nè
-tlai	tương lai
-bsĩ	bác sĩ
-hkì	học kỳ
-đcsvn	đảng cộng sản việt nam
-vde	vấn đề
-chta	chúng ta
-òy	rồi
-ltinh	linh tinh
-ngyeu	người yêu
-đthoai	điện thoại
-snghĩ	suy nghĩ
-nặg	nặng
-họk	học
-dừg	dừng
-hphúc	hạnh phúc
-hiha	hi ha
-wtâm	quan tâm
-thíck	thích
-chuện	chuyện
-lạh	lạnh
-fây	phây
-ntnày	như thế này
-lúk	lúc
-haj	hai
-ngía	nghía
-mớj	mới
-hsơ	hồ sơ
-ctraj	con trai
-nyêu	người yêu
-điiiiiii	đi
-rồii	rồi
-c	chị
-kih	kinh
-kb	kết bạn
-hixxx	hích
-dthương	dễ thương
-nhiềuuu	nhiều
-ctrình	chương trình
-mìnk	mình
-mjh	mình
-ng	người
-vc	vợ chồng
-uhm	ừm
-thỳ	thì
-nyc	người yêu cũ
-tks	thanks
-nàg	nàng
-thôii	thôi
-đjên	điên
-bgái	bạn gái
-vớii	với
-xink	xinh
-hđộng	hành động
-đhọc	đại học
-mk	mình
-bn	bạn
-thik	thích
-cj	chị
-mn	mọi người
-nguoi	người
-nógn	nóng
-hok	không
-ko	không
-bik	biết
-vs	với
-cx	cũng
-mik	mình
-wtf	what the fuck
-đc	được
-cmt	comment
-ck	chồng
-chk	chồng
-ngta	người ta
-gđ	gia đình
-oh	ồ
-vk	vợ
-ctác	công tác
-sg	sài gòn
-ae	anh em
-ah	à
-ạh	ạ
-rì	gì
-ms	mới
-vn	việt nam
-nhaa	nha
-cũg	cũng
-đag	đang
-ơiii	ơi
-hic	hích
+a	anh
 ace	anh chị em
-àk	à
-uh	ừ
-cmm	con mẹ mày
-cmnr	con mẹ nó rồi
-ơiiii	ơi
-hnay	hôm nay
-ukm	ừm
-tq	trung quốc
-ctr	chương trình
-đii	đi
-nch	nói chuyện
-trieu	triệu
-hahah	ha ha
-nta	người ta
-ngèo	nghèo
-kêh	kênh
+add	kết bạn
+ae	anh em
+afk	rời bàn phím
+ah	à
 ak	à
-ad	admin
-j	gì
-ny	người yêu
-dc	được
-qc	quảng cáo
-baoh	bao giờ
-zui	vui
-zẻ	vẻ
-tym	tim
+atrai	anh trai
+atsm	ảo tưởng sức mạnh
 aye	anh yêu em
+baoh	bao giờ
+bbè	bạn bè
+bf	bạn trai
+bgái	bạn gái
+biet	biết
+bik	biết
+biêt	biết
+bme	bố mẹ
+bn	bạn
+bnhiu	bao nhiêu
+bnhiêu	bao nhiêu
+bsvv	buổi sáng vui vẻ
+bsĩ	bác sĩ
+bth	bình thường
+bthường	bình thường
+btrai	bạn trai
+btw	nhân tiện
+buôg	buông
+bìh	bình
+bóg	bóng
+bằg	bằng
+c	chị
+cbị	chuẩn bị
+ce	chị em
+cgai	con gái
+cgái	con gái
+chk	chồng
+chs	chẳng hiểu sao
+chta	chúng ta
+chug	chung
+chuện	chuyện
+chàg	chàng
+chúg	chúng
+chăg	chăng
+cj	chị
+ck	chồng
+cka	cha
+clmm	cái lồn mẹ mày
+cmm	con mẹ mày
+cmn	con mẹ nó
+cmnd	chứng minh nhân dân
+cmnr	con mẹ nó rồi
+cmày	chúng mày
+crush	người mình thích
+csong	cuộc sống
+csống	cuộc sống
+cta	chúng ta
+ctr	chương trình
+ctrai	con trai
+ctraj	con trai
+ctrinh	chương trình
+ctrình	chương trình
+cty	công ty
+ctác	công tác
+cv	công việc
+cviec	công việc
+cx	cũng
+càg	càng
+cùg	cùng
+cđời	cuộc đời
+cũg	cũng
+cũng z	cũng vậy
+dc	được
+del	xóa
+dky	đăng ký
+dl	dữ liệu
+dm	địt mẹ
+dmk	địt mẹ
+dthương	dễ thương
+dz	đẹp trai
+dzậy	dậy
+dàh	dành
+dòg	dòng
+dừg	dừng
+e	em
 eya	em yêu anh
-fb	facebook
-insta	instagram
-z	vậy
-thich	thích
-vcl	vờ cờ lờ
-đt	điện thoại
-acc	account
+fl	theo dõi
+fol	theo dõi
+fải	phải
+gf	bạn gái
+giốg	giống
+gr	nhóm
+gđ	gia đình
+gđình	gia đinh
+gắg	gắng
+hahah	ha ha
+haj	hai
+hajz	hai
+hajzz	hai
+hc	học
+hkì	học kỳ
+hnay	hôm nay
+hok	không
+hoy	thôi
+hphúc	hạnh phúc
+hqua	hôm qua
+hsơ	hồ sơ
+htrc	hôm trước
+hìh	hình
+hôg	không
+hđộng	hành động
+họk	học
+ik	ý
+iu	yêu
+j	gì
+ji	gì
+jo	giờ
+júp	giúp
+k	không
+kbiet	không biết
+kh	không
+khg	không
+khoảg	khoảng
+khôg	không
+kih	kinh
+klq	không liên quan
+ko	không
+kqua	kết quả
+ksao	không sao
+kte	kinh tế
+ktra	kiểm tra
+ku	cu
+kái	cái
+kêh	kênh
+kòn	còn
+kô	không
+kũg	cũng
+kảm	cảm
+kậu	cậu
+kủa	của
+lgi	làm gì
+llac	liên lạc
+lm	làm
+lmht	liên minh huyền thoại
 lol	lồn
 loz	lồn
 lozz	lồn
-trc	trước
-chs	chẳng hiểu sao
-đhs	đéo hiểu sao
-qá	quá
-ntn	như thế nào
-wá	quá
-zậy	vậy
-zô	vô
-ytb	youtube
-vđ	vãi đái
-vchg	vãi chưởng
-sml	sấp mặt lờ
-xl	xin lỗi
-cmn	con mẹ nó
-face	facebook
-hjhj	hi hi
-vv	vui vẻ
-ns	nói
-iu	yêu
-vcđ	vãi cải đái
-in4	info
-qq	quằn què
-sub	subcribe
-kh	không
-zạ	vậy
-oy	rồi
-jo	giờ
-clmm	cái lồn mẹ mày
-bsvv	buổi sáng vui vẻ
-troai	trai
-wa	quá
-hjx	hix
-e	em
-ik	ý
-ji	gì
-ce	chị em
-lm	làm
-đz	đẹp giai
-sr	sorry
-ib	inbox
-hoy	thôi
-đbh	đéo bao giờ
-k	không
-vd	ví dụ
-a	anh
-cũng z	cũng vậy
-z là	vậy là
-unf	unfriend
-my fen	my friend
-fen	friend
-cty	công ty
-on lai	online
-u hai ba	u23
-kô	không
-đtqg	đội tuyển quốc gia
-hqua	hôm qua
-xog	xong
-uh	ừ
-uk	ừ
-nhoé	nhé
-biet	biết
-quí	quý
-stk	số tài khoản
-hong kong	hồng kông
-đươc	được
+lquan	liên quan
+lquen	làm quen
+ltinh	linh tinh
+lz	làm gì
+lzi	làm gì
+lòg	lòng
+lúk	lúc
+lạh	lạnh
+lặg	lặng
+mih	mình
+mik	mình
+mjh	mình
+mk	mình
+mn	mọi người
+mng	mọi người
+mnk	mọi người
+mqh	mối quan hệ
+ms	mới
+mìnk	mình
+mớj	mới
+nc	nói chuyện
+nch	nói chuyện
+nek	nè
+ng	người
+ngag	ngang
 nghành	ngành
-nvqs	nghĩa vụ quân sự
-ngừoi	người
-trog	trong
-tgian	thời gian
-biêt	biết
-fải	phải
+ngke	nghe
+ngkhác	người khác
+ngta	người ta
+nguoi	người
 nguời	người
-tđn	thế đéo nào
-bth	bình thường
-vcđ	vãi cả đái
-tgdd	thế giới di động
-khg	không
+ngyeu	người yêu
+ngàh	ngành
+ngèo	nghèo
+ngía	nghía
+ngđo	người đó
+ngđó	người đó
+ngốk	ngốc
+ngừoi	người
+nhaa	nha
+nhiềuuu	nhiều
+nhjeu	nhiều
+nhoé	nhé
 nhưg	nhưng
-thpt	trung học phổ thông
-thằg	thằng
-đuợc	được
-dc	được
-đc	được
-ah	à
-àh	à
-ku	cu
-thým	thím
-onl	online
-zô	dô
-zú	vú
-cmnd	chứng minh nhân dân
+nhưq	nhưng
+nhữg	những
+nkư	như
+nkưng	nhưng
+nma	nhưng mà
+ns	nói
+nt	nhắn tin
+nta	người ta
+nthe	như thế
+nthê	như thế
+nthế	như thế
+ntn	như thế nào
+ntnao	như thế nào
+ntnày	như thế này
+nvay	như vậy
+nvqs	nghĩa vụ quân sự
+nvậy	như vậy
+ny	người yêu
+nyc	người yêu cũ
+nyêu	người yêu
+nàg	nàng
+nèk	nè
+nógn	nóng
+năg	năng
+nắg	nắng
+nặg	nặng
+oy	rồi
+phog	phong
+phòg	phòng
+pjt	biết
+pn	bạn
+qc	quảng cáo
+qhe	quan hệ
+qhệ	quan hệ
+qq	quằn què
+qtam	quan tâm
+qtrọng	quan trọng
+qtâm	quan tâm
+quí	quý
+qà	quà
+qá	quá
+qả	quả
+r	rồi
+riêg	riêng
+rì	gì
+răg	răng
+rằg	rằng
+rồii	rồi
+sg	sài gòn
+sml	sấp mặt lờ
+snghĩ	suy nghĩ
+snvv	sinh nhật vui vẻ
+stk	số tài khoản
+sviên	sinh viên
+svtn	sinh viên tình nguyện
 sđt	số điện thoại
-klq	không liên quan
+sốg	sống
+tcảm	tình cảm
+tgdd	thế giới di động
+tgian	thời gian
+thgian	thời gian
+thich	thích
+thik	thích
+thjc	thích
+thjk	thích
+thoy	thôi
+thuj	thôi
+thàh	thành
+thíck	thích
+thík	thích
+thôii	thôi
+thým	thím
+thươg	thương
+thườg	thường
+thằg	thằng
+thẳg	thẳng
+thỳ	thì
+tiếg	tiếng
+tlai	tương lai
+tnào	thế nào
+tq	trung quốc
+trag	trang
+trc	trước
+trieu	triệu
+troai	trai
+trog	trong
+trườg	trường
+trọg	trọng
+tym	tim
+tyêu	tình yêu
+tìh	tình
+tíh	tính
+tđn	thế đéo nào
+tưởg	tưởng
+tượg	tượng
+từg	từng
+uh	ừ
+uhm	ừm
+uk	ừ
+ukm	ừm
+uốg	uống
+vc	vợ chồng
+vch	vãi chưởng
+vchg	vãi chưởng
+vcl	vờ cờ lờ
+vcđ	vãi cả đái
+vd	ví dụ
+vde	vấn đề
+vk	vợ
+vler	vãi lờ
+vn	việt nam
+vs	với
+vv	vui vẻ
+vđ	vãi đái
+vđê	vấn đề
+vọg	vọng
+vớii	với
+wa	quá
+wtâm	quan tâm
+wá	quá
+xg	xuống
+xih	xinh
+xink	xinh
+xl	xin lỗi
+xloi	xin lỗi
+xog	xong
+xug	xùng
+xuốg	xuống
+yt	yêu thương
+z	vậy
+z là	vậy là
+zui	vui
+zzz	buồn ngủ
+zà	già
+zám	dám
+zìa	gì
+zô	dô
+zùi	rồi
+zú	vú
+zạ	vậy
+zậy	vậy
+zẻ	vẻ
+zồi	rồi
+zữ	dữ
+àh	à
+àk	à
+ák	á
+òy	rồi
+đag	đang
+đbh	đéo bao giờ
+đc	được
+đhs	đéo hiểu sao
+đhọc	đại học
+đii	đi
+đjên	điên
+đki	đăng ký
+đkiện	điều kiện
+đky	đăng ký
+đt	điện thoại
+đthoai	điện thoại
+đthoại	điện thoại
+đuợc	được
+đz	đẹp giai
+đzai	đẹp trai
+đág	đáng
+đáh	đánh
+đóg	đóng
+đôg	đông
+đươc	được
+địh	định
+đồg	đồng
+độg	động
+đứg	đứng
+ơiii	ơi
+ơiiii	ơi
+ạh	ạ
+ạk	ạ
