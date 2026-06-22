@@ -1,8 +1,18 @@
-2026-06-23 00:46:05 - [diacritic_restoration.dataset] - INFO - DiacriticDataLoaderFactory initialized.2026-06-23 00:46:05 - [diacritic_restoration.processor] - INFO - Cleaning text pairs. Raw rows: 14,038
-2026-062026-06-23 00:46:09 - [diacritic_restoration.dataset] - DEBUG - [Train] Size after clean: 13,998
-2026-06-23 00:46:09 - [diacritic_restoration.dataset] - DEBUG - [Valid] Size after clean: 1,754
-2026-06-23 00:46:10 - [diacritic_restoration.dataset] - DEBUG - [Test] Size after clean: 1,755
-eted. Retained: 1,754 | Dropped: 0
-2026-06-23 00:46:09 - [diacritic_restoration.processor] - INFO - Cleaning text pairs. Raw rows: 1,756
-2026-06-23 00:46:10 - [diacritic_restoration.processor] - INFO - Cleaning completed. Retained: 1,755 | Dropped: 0
-2026-06-23 00:46:10 - [diacritic_restoration.processor] - INFO - Building sliding window sentence chunks...
+2026-06-23 01:27:33 - [diacritic_restoration.vocab] - INFO - Reading words file from: data/external/words.txt
+2026-06-23 01:27:33 - [diacritic_restoration.vocab] - INFO - Loaded external words dictionary: 79,195 entries.
+2026-06-23 01:27:33 - [diacritic_restoration.vocab] - INFO - Extracting unique characters from aggregated dataset...
+2026-06-23 01:27:33 - [diacritic_restoration.vocab] - DEBUG - Building CharVocab from texts...
+2026-06-23 01:27:35 - [diacritic_restoration.vocab] - INFO - CharVocab built successfully | size: 200
+2026-06-23 01:27:35 - [diacritic_restoration.vocab] - INFO - CharVocab finalized | size: 200
+2026-06-23 01:27:35 - [diacritic_restoration.vocab] - DEBUG - Building WordVocab | max_size: 50000 | min_freq: 2
+2026-06-23 01:27:37 - [diacritic_restoration.vocab] - DEBUG - Words meeting min_freq validation: 11,689
+2026-06-23 01:27:37 - [diacritic_restoration.vocab] - INFO - WordVocab built successfully | size: 11,692
+2026-06-23 01:27:37 - [diacritic_restoration.vocab] - INFO - WordVocab finalized | size: 11,692
+acritic_restoration.dataset] - INFO -   > Train (orig) : 13,998
+2026-06-23 01:27:33 - [diacritic_restoration.dataset] - INFO -   > Train (aug)  : 300,000
+2026-06-23 01:27:33 - [diacritic_restoration.dataset] - INFO -   > Valid (orig) : 1,754
+2026-06-23 01:27:33 - [diacritic_restoration.dataset] - INFO -   > Test (orig)  : 1,755
+2026-06-23 01:27:33 - [diacritic_restoration.dataset] - INFO - Building CharVocab and WordVocab...
+2026-06-23 01:27:37 - [diacritic_restoration.dataset] - INFO - Vocab built | CharVocab: 200 | WordVocab: 11,692
+2026-06-23 01:27:37 - [diacritic_restoration.dataset] - INFO - Creating AccentContextDataset instances...
+2026-06-23 01:27:37 - [diacritic_restoration.dataset] - DEBUG - Initializing AccentContextDataset with 300,000 raw rows.

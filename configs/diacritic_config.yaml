@@ -1,7 +1,7 @@
 # Data Paths & Columns
 data:
   csv_path: "data/raw/viet_khong_dau.csv"
-  words_path: "data/external/vocabulary.txt"
+  words_path: "data/external/words.txt"
   input_col: "input"
   target_col: "target"
   train_ratio: 0.8
