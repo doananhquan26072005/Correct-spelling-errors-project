@@ -173,7 +173,7 @@ class DiacriticTrainer:
             current_lr = self.optimizer.param_groups[0]["lr"]
 
             logger.info(
-                f"Epoch {epoch:03d}/{self.cfg.training.epochs} | "
+                f"Epoch {epoch:02d}/{self.cfg.training.epochs} | "
                 f"Train Loss: {train_loss:.4f} | "
                 f"Valid Loss: {valid_loss:.4f} | "
                 f"LR: {current_lr:.2e}"
