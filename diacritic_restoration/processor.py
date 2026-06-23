@@ -137,15 +137,21 @@ class DiacriticDataProcessor:
         )
 
 
-class DiacriticRestorer: 
+class DiacriticRestorer:
     def __init__(self, checkpoint_path: str, cfg):
         self.cfg = cfg
         logger.info(f"Initializing DiacriticRestorer from checkpoint: {checkpoint_path}")
         self.model, self.char_vocab, self.word_vocab, self.allowed_mask = self._load_checkpoint(checkpoint_path)
         logger.info("DiacriticRestorer pipeline successfully built.")
 
+    @torch.no_grad()
     def _predict_batch(self, src_char: torch.Tensor, src_word: torch.Tensor) -> torch.Tensor:
+        self.model.eval()
+        # print(src_char)
+        # print(src_word)
+        # print(self.model)
         logits = self.model(src_char, src_word)
+        # print(logits)
         logits = apply_constraint_to_logits(logits, src_char, self.allowed_mask)
         return logits.argmax(dim=-1)
 
@@ -169,8 +175,9 @@ class DiacriticRestorer:
 
         with torch.no_grad():
             pred_ids = self._predict_batch(src_char=src_char, src_word=src_word)
-
+    
         pred_ids = pred_ids[0].detach().cpu().tolist()
+        print(f"Predicted accent tag IDs: {pred_ids}")
         output_chars = []
         limit = min(len(text), self.cfg.model.max_len)
 
@@ -233,7 +240,7 @@ class DiacriticRestorer:
         state_dict = checkpoint["model_state_dict"]
         new_state_dict = {}
         for key, value in state_dict.items():
-            if key.startswith("module.i"):
+            if key.startswith("module."):
                 new_state_dict[key[7:]] = value
             elif key.startswith("_orig_mod."):
                 new_state_dict[key[10:]] = value

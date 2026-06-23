@@ -20,11 +20,11 @@ def get_logger(module_name):
         )
 
         file_handler = logging.FileHandler(LOG_FILE, mode='w', encoding='utf-8')
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
 
         console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.DEBUG)
+        console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(formatter)
 
         logger.addHandler(file_handler)

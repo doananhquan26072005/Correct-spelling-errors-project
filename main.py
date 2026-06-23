@@ -137,26 +137,26 @@ def main():
             ranker=ranker, word_to_idx=word_to_idx
         )
 
-        evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
-        evaluator.evaluate_ranking_performance(
-            validation_df=df1_valid, abbr_engine=abbr_engine,
-            extractor_engine=extractor_engine, generator=generator,
-            ranker=ranker, stopwords=stopwords
-        )
-        evaluator.evaluate_word_accuracy(
-            validation_df=df1_valid, abbr_engine=abbr_engine,
-            pipeline_correct_fn=pipeline.correct_sentence,
-            stopwords=stopwords, word_to_idx=word_to_idx
-        )
-        evaluator.evaluate_end_to_end(
-            validation_df=df1_valid, abbr_engine=abbr_engine,
-            pipeline_correct_fn=pipeline.correct_sentence, stopwords=stopwords
-        )
+        # evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
+        # evaluator.evaluate_ranking_performance(
+        #     validation_df=df1_valid, abbr_engine=abbr_engine,
+        #     extractor_engine=extractor_engine, generator=generator,
+        #     ranker=ranker, stopwords=stopwords
+        # )
+        # evaluator.evaluate_word_accuracy(
+        #     validation_df=df1_valid, abbr_engine=abbr_engine,
+        #     pipeline_correct_fn=pipeline.correct_sentence,
+        #     stopwords=stopwords, word_to_idx=word_to_idx
+        # )
+        # evaluator.evaluate_end_to_end(
+        #     validation_df=df1_valid, abbr_engine=abbr_engine,
+        #     pipeline_correct_fn=pipeline.correct_sentence, stopwords=stopwords
+        # )
 
-        visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
-        exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
-            validation_df=df1_valid, stopwords=stopwords, num_samples=200
-        )
+        # visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
+        # exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
+        #     validation_df=df1_valid, stopwords=stopwords, num_samples=200
+        # )
 
         logger.info("=== RUNNING DIACRITIC RESTORATION PIPELINE ON DF2 ===")
         data_factory = DiacriticDataLoaderFactory(dia_cfg)

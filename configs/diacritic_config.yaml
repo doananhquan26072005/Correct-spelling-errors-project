@@ -17,12 +17,12 @@ vocab:
 augmentation:
   lowercase: true
   use_word_pairs: true
-  max_word_pairs: 20000
+  max_word_pairs: 30000
   use_sentence_chunks: true
   chunk_min_words: 5
-  chunk_max_words: 20
-  chunk_stride: 3
-  max_train_samples: 200000
+  chunk_max_words: 24
+  chunk_stride: 2
+  max_train_samples: 300000
 
 # Model Architecture
 model:
@@ -31,14 +31,14 @@ model:
   char_emb_dim: 128
   word_emb_dim: 64
   nhead: 4
-  num_encoder_layers: 3
-  dim_feedforward: 512
+  num_encoder_layers: 4
+  dim_feedforward: 768
   dropout: 0.2
 
 # Hyperparameters & Training Settings
 training:
   batch_size: 1024
-  epochs: 50
+  epochs: 80
   learning_rate: 1.0e-4
   weight_decay: 1.0e-4
   grad_clip: 1.0
@@ -49,5 +49,5 @@ training:
 # Loss & Constraints
 loss:
   copy_loss_weight: 1.0
-  accent_loss_weight: 4.0
+  accent_loss_weight: 10.0
   use_constraint_in_training: true
