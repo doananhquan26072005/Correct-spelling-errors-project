@@ -32,7 +32,7 @@ model:
   word_emb_dim: 64
   nhead: 4
   num_encoder_layers: 4
-  dim_feedforward: 768
+  dim_feedforward: 512
   dropout: 0.2
 
 # Hyperparameters & Training Settings
