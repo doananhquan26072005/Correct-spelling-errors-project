@@ -10,37 +10,37 @@ data:
 
 # Vocabulary configuration
 vocab:
-  max_word_vocab_size: 50000
-  min_word_freq: 2          # Adjusted: Filter out low-frequency noise/typos
+  max_word_vocab_size: 40000        # Giảm nhẹ từ 50k xuống 40k để thu hẹp chiều của lớp Linear đầu ra (Softmax)
+  min_word_freq: 3                  # Tăng từ 2 lên 3 nhằm lọc bớt từ hiếm, giảm dung lượng vocab hiệu quả
 
 # Data Generation / Augmentation
 augmentation:
   lowercase: true
-  use_word_pairs: true      # Adjusted: Enable word pairs to strengthen dictionary context
-  max_word_pairs: 30000
+  use_word_pairs: true      
+  max_word_pairs: 20000             # Giảm bớt số cặp từ cố định để giảm tải sinh dữ liệu
   use_sentence_chunks: true
   chunk_min_words: 5
-  chunk_max_words: 24
-  chunk_stride: 2
-  max_train_samples: 300000
+  chunk_max_words: 20               # Giảm nhẹ từ 24 xuống 20 (Chuỗi ngắn hơn giúp Transformer tính Attention nhanh hơn rất nhiều)
+  chunk_stride: 3                   # Tăng bước nhảy từ 2 lên 3 để giảm bớt sự trùng lặp dữ liệu không cần thiết
+  max_train_samples: 200000         # Giảm từ 300k xuống 200k. (200k mẫu là quá đủ để một mạng nhỏ hội tụ)
 
 # Model Architecture
 model:
-  max_len: 256
+  max_len: 128                      # GIẢM CHIẾN LƯỢC: Từ 256 xuống 128. Cơ chế Self-Attention tốn chi phí theo O(N^2), giảm một nửa max_len sẽ giúp tăng tốc độ xử lý chuỗi lên gấp 4 lần!
   d_model: 192
   char_emb_dim: 128
   word_emb_dim: 64
   nhead: 4
-  num_encoder_layers: 4
-  dim_feedforward: 768
-  dropout: 0.15             # Adjusted: Slightly reduced to prevent underfitting in small networks
+  num_encoder_layers: 3             # Giảm nhẹ từ 4 xuống 3 layers để bớt tham số tính toán
+  dim_feedforward: 512              # Giảm từ 768 xuống 512 nhằm tăng tốc tầng FeedForward nội bộ
+  dropout: 0.15             
 
 # Hyperparameters & Training Settings
 training:
-  batch_size: 128           # Adjusted: Scale to 128 if VRAM allows for smoother gradients
-  epochs: 60                # Adjusted: 60 epochs is usually sufficient with adaptive LR scheduling
-  learning_rate: 3.0e-4     # Adjusted: Faster initial convergence for AdamW
-  weight_decay: 1.0e-2      # Adjusted: Standard AdamW weight decay instead of 1e-4
+  batch_size: 256                   # Tăng từ 128 lên 256 để tận dụng tối đa sức mạnh tính toán song song của GPU, giảm thời gian mỗi epoch
+  epochs: 40                        # Giảm từ 60 xuống 35. Khi kết hợp với việc giảm dữ liệu và tăng batch size, 35 epochs sẽ chạy cực nhanh và thường đã đủ hội tụ với AdamW
+  learning_rate: 5.0e-4             # Tăng nhẹ từ 3e-4 lên 5e-4 để mô hình học nhanh hơn trong số epoch ít hơn
+  weight_decay: 1.0e-2      
   grad_clip: 1.0
   seed: 42
   checkpoint_path: "models/accent_tagger_context_v3.pt"
@@ -49,5 +49,5 @@ training:
 # Loss & Constraints
 loss:
   copy_loss_weight: 1.0
-  accent_loss_weight: 4.0   # Adjusted: Balanced ratio to mitigate over-correction tendency
+  accent_loss_weight: 4.0   
   use_constraint_in_training: true
