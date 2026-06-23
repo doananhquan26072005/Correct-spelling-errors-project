@@ -115,10 +115,7 @@ class SkipGramTrainer:
         self.model = SkipGram(vocab_size, embed_dim).to(self.device)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(self.model.parameters(), lr=lr)
-        if torch.cuda.is_available() and torch.cuda.device_count() > 1:
-            logger.info(f"Multi-GPU environment detected: {torch.cuda.device_count()} GPUs available. Activating DataParallel.")
-            self.model = nn.DataParallel(self.model)
-            
+
         logger.info(f"Starting Skip-gram training on: {self.device.upper()} | Total Epochs: {epochs}")
         total_start_time = time.time()
         self.model.train()
