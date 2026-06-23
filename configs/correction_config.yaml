@@ -31,7 +31,7 @@ detector_heuristics:
   hard_floor: -6.26
 
 candidate_generation:
-  top_k_raw: 5
+  top_k_raw: 3
   max_delete_k: 2
   sub_cost_confusion: 0.4
   sub_cost_adjacent: 0.5
