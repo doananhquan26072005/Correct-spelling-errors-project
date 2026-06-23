@@ -5,6 +5,8 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from typing import Tuple
+from torch import nn
+import torch
 from tqdm import tqdm
 
 from common.logger import get_logger
@@ -162,6 +164,10 @@ class LightGBMRankerTrainer:
 
         logger.info("Fitting LightGBMRanker on dataset...")
         start_time = time.time()
+        if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+            logger.info(f"Multi-GPU environment detected: {torch.cuda.device_count()} GPUs available. Activating DataParallel.")
+            self.ranker = nn.DataParallel(self.ranker)
+            
         self.ranker.fit(
             X=X_train,
             y=y_train,
