@@ -1,10 +1,7 @@
-import os
 import time
-import numpy as np
 import pandas as pd
 import torch
 import kenlm
-import gdown
 from datasets import load_dataset
 
 from common.logger import get_logger
@@ -20,8 +17,7 @@ from spell_correction import (
     Evaluator,
     Visualizer,
     LightGBMRankerTrainer,
-    SkipGramTrainer,
-    SkipGram
+    SkipGramTrainer
 )
 
 logger = get_logger("SpellCorrectionMainPipeline")

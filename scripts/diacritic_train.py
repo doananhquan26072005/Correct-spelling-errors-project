@@ -69,7 +69,8 @@ if __name__ == "__main__":
             cfg=cfg
         )
         model = trainer.fit(train_loader, valid_loader, test_loader)
-
+        
+        stopwords = set()
         logger.info("=== LOADING BEST CHECKPOINT FOR EVALUATION ===")
         restorer = DiacriticRestorer(
             checkpoint_path=cfg.training.checkpoint_path,
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         logger.info("=== LIVE INFERENCE DEMO ===")
         for idx, text in enumerate(examples, 1):
             inference_start = time.time()
-            predicted_text = restorer.process(text)
+            predicted_text = restorer.process(text, stopwords)
             inference_time = time.time() - inference_start
             
             logger.info(f"Sample #{idx} | Inference time: {inference_time*1000:.2f}ms")
