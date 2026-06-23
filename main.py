@@ -168,34 +168,34 @@ def main():
             cfg=dia_cfg
         )
         
-        logger.info("=== LIVE INFERENCE DEMO ON DF2 ===")
-        col_name = 'input' if 'input' in df2_valid.columns else df2_valid.columns[0]
-        df2_examples = df2_valid[col_name].dropna().head(10).tolist()
+        # logger.info("=== LIVE INFERENCE DEMO ON DF2 ===")
+        # col_name = 'input' if 'input' in df2_valid.columns else df2_valid.columns[0]
+        # df2_examples = df2_valid[col_name].dropna().head(10).tolist()
 
-        for idx, text in enumerate(df2_examples, 1):
-            inference_start = time.time()
-            predicted_text = restorer.process(text, stopwords)
-            inference_time = time.time() - inference_start
+        # for idx, text in enumerate(df2_examples, 1):
+        #     inference_start = time.time()
+        #     predicted_text = restorer.process(text, stopwords)
+        #     inference_time = time.time() - inference_start
             
-            logger.info(f"Sample #{idx} | Inference time: {inference_time*1000:.2f}ms")
-            logger.info(f"  > [IN]  : {text}")
-            logger.info(f"  > [OUT] : {predicted_text}")
+        #     logger.info(f"Sample #{idx} | Inference time: {inference_time*1000:.2f}ms")
+        #     logger.info(f"  > [IN]  : {text}")
+        #     logger.info(f"  > [OUT] : {predicted_text}")
 
-        logger.info("=== QUANTITATIVE EVALUATION FOR DIACRITIC RESTORATION ===")
-        evaluator.evaluate_word_accuracy(
-            validation_df=df2_valid,
-            abbr_engine=abbr_engine, 
-            pipeline_correct_fn=restorer.process, 
-            stopwords=stopwords,
-            word_to_idx=word_to_idx
-        )
+        # logger.info("=== QUANTITATIVE EVALUATION FOR DIACRITIC RESTORATION ===")
+        # evaluator.evaluate_word_accuracy(
+        #     validation_df=df2_valid,
+        #     abbr_engine=abbr_engine, 
+        #     pipeline_correct_fn=restorer.process, 
+        #     stopwords=stopwords,
+        #     word_to_idx=word_to_idx
+        # )
 
-        evaluator.evaluate_end_to_end(
-            validation_df=df2_valid,
-            abbr_engine=abbr_engine,
-            pipeline_correct_fn=restorer.process, 
-            stopwords=stopwords
-        )
+        # evaluator.evaluate_end_to_end(
+        #     validation_df=df2_valid,
+        #     abbr_engine=abbr_engine,
+        #     pipeline_correct_fn=restorer.process, 
+        #     stopwords=stopwords
+        # )
 
         logger.info("=== EVALUATING JOINT PIPELINE ON UNSPLIT GLOBAL TEST SET ===")
 
@@ -216,6 +216,17 @@ def main():
             logger.debug(f"Final corrected text: {final_clean_text}")
             
             return final_clean_text
+        
+        def full_nlp_pipeline(text, stopwords=stopwords):
+            if not text or not isinstance(text, str):
+                return ""
+            logger.debug(f"Input text: {text}")
+            restored_text = restorer.process(text, stopwords)
+            logger.debug(f"Restored text: {restored_text}")
+            final_clean_text = pipeline.correct_sentence(restored_text, stopwords)
+            logger.debug(f"Final corrected text: {final_clean_text}")
+            
+            return final_clean_text
 
         logger.info("Running joint evaluation loop (Diacritic + Spell) on df_test...")
         
@@ -226,11 +237,26 @@ def main():
             stopwords=stopwords,
             word_to_idx=word_to_idx
         )
+        
+        evaluator.evaluate_word_accuracy(
+            validation_df=df_test, 
+            abbr_engine=abbr_engine,
+            pipeline_correct_fn=full_nlp_pipeline, 
+            stopwords=stopwords,
+            word_to_idx=word_to_idx
+        )
 
         evaluator.evaluate_end_to_end(
             validation_df=df_test,
             abbr_engine=abbr_engine,
             pipeline_correct_fn=joint_nlp_pipeline,
+            stopwords=stopwords
+        )
+
+        evaluator.evaluate_end_to_end(
+            validation_df=df_test,
+            abbr_engine=abbr_engine,
+            pipeline_correct_fn=full_nlp_pipeline,
             stopwords=stopwords
         )
 

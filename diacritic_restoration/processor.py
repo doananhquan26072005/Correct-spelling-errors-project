@@ -147,11 +147,7 @@ class DiacriticRestorer:
     @torch.no_grad()
     def _predict_batch(self, src_char: torch.Tensor, src_word: torch.Tensor) -> torch.Tensor:
         self.model.eval()
-        # print(src_char)
-        # print(src_word)
-        # print(self.model)
         logits = self.model(src_char, src_word)
-        # print(logits)
         logits = apply_constraint_to_logits(logits, src_char, self.allowed_mask)
         return logits.argmax(dim=-1)
 
@@ -177,7 +173,6 @@ class DiacriticRestorer:
             pred_ids = self._predict_batch(src_char=src_char, src_word=src_word)
     
         pred_ids = pred_ids[0].detach().cpu().tolist()
-        print(f"Predicted accent tag IDs: {pred_ids}")
         output_chars = []
         limit = min(len(text), self.cfg.model.max_len)
 
