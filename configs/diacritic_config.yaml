@@ -31,14 +31,14 @@ model:
   char_emb_dim: 128
   word_emb_dim: 64
   nhead: 4
-  num_encoder_layers: 4
+  num_encoder_layers: 3
   dim_feedforward: 512
   dropout: 0.2
 
 # Hyperparameters & Training Settings
 training:
   batch_size: 1024
-  epochs: 60
+  epochs: 50
   learning_rate: 1.0e-4
   weight_decay: 1.0e-4
   grad_clip: 1.0
