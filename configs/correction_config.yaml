@@ -14,8 +14,8 @@ model:
   window_size: 3
 
 skipgram_training:
-  batch_size: 1024                 # Tăng từ 512 lên 1024 để tận dụng GPU/CPU, đẩy nhanh tốc độ mỗi epoch
-  epochs: 10                       # Giảm từ 25 xuống 10 (Hạ bớt epochs là cách nhanh nhất để cứu vãn time budget)
+  batch_size: 1024
+  epochs: 10
   learning_rate: 0.001
 
 ranker_training:
@@ -24,33 +24,33 @@ ranker_training:
   min_child_samples: 20
   random_state: 42
   eval_at: [1, 3, 5]
-  n_estimators: 100                # Giới hạn số cây của LightGBM (nếu code của bạn có nhận tham số này)
+  n_estimators: 100
 
 detector_heuristics:
-  alpha: 4.6               
-  hard_ceiling: -3.9       
-  hard_floor: -6.26        
+  alpha: 4.6
+  hard_ceiling: -3.9
+  hard_floor: -6.26
 
 candidate_generation:
-  top_k_raw: 5                     # Giảm từ 8 xuống 5 để giảm số lượng candidate sinh ra -> giảm tải cho Ranker rất nhiều
-  max_delete_k: 2          
-  sub_cost_confusion: 0.4  
-  sub_cost_adjacent: 0.5   
-  transposition_cost: 0.5  
+  top_k_raw: 5
+  max_delete_k: 2
+  sub_cost_confusion: 0.4
+  sub_cost_adjacent: 0.5
+  transposition_cost: 0.5
 
 feature_normalization:
-  kenlm_min_max_ceiling: 15.0  
-  log_norm_unigram: 15.0       
-  log_norm_bigram: 12.0        
-  log_norm_trigram: 12.0       
+  kenlm_min_max_ceiling: 15.0
+  log_norm_unigram: 15.0
+  log_norm_bigram: 12.0
+  log_norm_trigram: 12.0
 
-feature_weights:                  
-  w_kenlm: 0.25                    
-  w_edit: 0.20                     
-  w_len: 0.10                      
-  w_bigram: 0.15                   
-  w_trigram: 0.10                  
-  w_unigram: 0.05                  
-  w_sim: 0.15                      
+feature_weights:
+  w_kenlm: 0.25
+  w_edit: 0.20
+  w_len: 0.10
+  w_bigram: 0.15
+  w_trigram: 0.10
+  w_unigram: 0.05
+  w_sim: 0.15
 
 confusion_pairs: {}
