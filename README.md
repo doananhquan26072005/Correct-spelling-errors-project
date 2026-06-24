@@ -84,7 +84,8 @@ colab/
 │   └── visualizer.py            # Prediction analysis & sampling
 ├── scripts/
 │   ├── diacritic_train.py       # Standalone diacritic training/eval entry point
-│   └── correction_train.py      # Standalone spell-correction training/eval entry point
+│   ├── correction_train.py      # Standalone spell-correction training/eval entry point
+│   └── kenlm_train.py           # Builds KenLM from source and trains the trigram LM
 ├── data/
 │   ├── external/                # vocab, stopwords, telex & teen-code dictionaries
 │   ├── raw/                     # viet_khong_dau.csv (accent-removed corpus)
@@ -214,6 +215,20 @@ python scripts/diacritic_train.py
 # Spell correction: train SkipGram + LightGBM ranker and evaluate
 python scripts/correction_train.py
 ```
+
+### Train the KenLM trigram language model
+
+```bash
+# corpus.txt must exist in data/processed/ before running
+python scripts/kenlm_train.py
+```
+
+`kenlm_train.py` clones and compiles KenLM from source (skipped if binaries
+already exist), trains a trigram ARPA model from `data/processed/corpus.txt`,
+converts it to the optimized binary `models/trigram.bin`, and removes the
+intermediate `.arpa` file. The resulting `trigram.bin` is the artifact loaded
+by the spell corrector via `paths.trigram_lm_file` in
+`correction_config.yaml`.
 
 Each script is self-contained: it loads its config, prepares data, trains (or loads)
 the model, and reports metrics through the shared `Evaluator` / `Visualizer`.
