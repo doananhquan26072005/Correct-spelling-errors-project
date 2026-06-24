@@ -155,12 +155,19 @@ run on the joint output.
 ```bash
 git clone <repo-url>
 cd colab
-
-# Recommended: create a virtual environment
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+source .venv/bin/activate        # Windows (WSL/Linux recommended): .venv\Scripts\activate
+
+sudo apt-get update && sudo apt-get install -y build-essential cmake libboost-all-dev zlib1g-dev libbz2-dev liblzma-dev
 
 pip install -r requirements.txt
+pip install [https://github.com/kpu/kenlm/archive/master.zip](https://github.com/kpu/kenlm/archive/master.zip)
+
+git clone [https://github.com/kpu/kenlm.git](https://github.com/kpu/kenlm.git)
+mkdir -p kenlm/build && cd kenlm/build
+cmake ..
+make -j 4
+cd ../..
 ```
 
 `requirements.txt` covers PyTorch, LightGBM, HuggingFace `datasets`, `gdown`,
