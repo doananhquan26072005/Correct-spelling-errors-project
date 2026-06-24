@@ -130,12 +130,12 @@ def main():
         X_train, y_train, group_train = ranker_trainer.load_training_data(spell_cfg.paths.lightgbm_data_file)
         ranker = ranker_trainer.train(X_train, y_train, group_train)
 
-        # logger.info("=== EVALUATING SPELL CORRECTION PIPELINE ===")
-        # pipeline = SpellCorrectionPipeline(
-        #     cfg=spell_cfg, abbr_processor=abbr_engine, evaluator=evaluator, 
-        #     model_lm=model_lm, generator=generator, extractor_engine=extractor_engine,
-        #     ranker=ranker, word_to_idx=word_to_idx
-        # )
+        logger.info("=== EVALUATING SPELL CORRECTION PIPELINE ===")
+        pipeline = SpellCorrectionPipeline(
+            cfg=spell_cfg, abbr_processor=abbr_engine, evaluator=evaluator, 
+            model_lm=model_lm, generator=generator, extractor_engine=extractor_engine,
+            ranker=ranker, word_to_idx=word_to_idx
+        )
 
         # evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
         # evaluator.evaluate_ranking_performance(
