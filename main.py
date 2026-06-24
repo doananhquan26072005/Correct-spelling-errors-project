@@ -235,7 +235,7 @@ def main():
         # )
         visualizer = Visualizer(pipeline=joint_pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
         exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
-            validation_df=df_test, stopwords=stopwords, num_samples=20
+            validation_df=df_test, stopwords=stopwords, num_samples=50
         )
         total_pipeline_time = time.time() - pipeline_start_time
         logger.info(f"=== COMPREHENSIVE PIPELINE COMPLETED IN {total_pipeline_time:.2f}s ===")
