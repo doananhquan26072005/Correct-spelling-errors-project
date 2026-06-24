@@ -30,7 +30,7 @@ class Visualizer:
             cleaned_input = self.abbr_engine.replace_abbreviations(input_sent)
             _, error_indices = self.evaluator.find_misspelled_words_and_targets(cleaned_input, target_sent, self.word_to_idx)
 
-            fixed_sentence_str = self.pipeline.correct_sentence(cleaned_input, stopwords)
+            fixed_sentence_str = self.pipeline(cleaned_input, stopwords)
 
             target_tokens = target_sent.split()
             fixed_tokens = fixed_sentence_str.split()
