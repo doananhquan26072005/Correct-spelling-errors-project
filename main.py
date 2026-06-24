@@ -135,7 +135,7 @@ def main():
             cfg=spell_cfg, abbr_processor=abbr_engine, evaluator=evaluator, 
             model_lm=model_lm, generator=generator, extractor_engine=extractor_engine,
             ranker=ranker, word_to_idx=word_to_idx
-        )
+        ).correct_sentence()
 
         # evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
         # evaluator.evaluate_ranking_performance(
@@ -153,10 +153,10 @@ def main():
         #     pipeline_correct_fn=pipeline.correct_sentence, stopwords=stopwords
         # )
 
-        # visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
-        # exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
-        #     validation_df=df1_valid, stopwords=stopwords, num_samples=10
-        # )
+        visualizer = Visualizer(pipeline=pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
+        exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
+            validation_df=df1_valid, stopwords=stopwords, num_samples=10
+        )
 
         logger.info("=== RUNNING DIACRITIC RESTORATION PIPELINE ON DF2 ===")
         data_factory = DiacriticDataLoaderFactory(dia_cfg)
