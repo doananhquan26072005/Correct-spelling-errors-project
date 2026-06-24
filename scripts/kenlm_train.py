@@ -17,7 +17,7 @@ CORPUS_PATH = os.path.join(ROOT_DIR, "data", "processed", "corpus.txt")
 
 MODELS_DIR = os.path.join(ROOT_DIR, "models")
 ARPA_OUTPUT_PATH = os.path.join(MODELS_DIR, "model.arpa")
-BINARY_OUTPUT_PATH = os.path.join(MODELS_DIR, "model_ken_lm.bin")
+BINARY_OUTPUT_PATH = os.path.join(MODELS_DIR, "trigram.bin")
 
 NGRAM_ORDER = 3
 
