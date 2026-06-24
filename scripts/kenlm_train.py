@@ -6,19 +6,20 @@ from common.logger import get_logger
 
 logger = get_logger(__name__)
 
-CURRENT_DIR = os.getcwd()
-KENLM_DIR = os.path.join(CURRENT_DIR, "kenlm")
-BUILD_DIR = os.path.join(KENLM_DIR, "build")
+ROOT_DIR = os.getcwd()
 
+KENLM_DIR = os.path.join(ROOT_DIR, "kenlm")
+BUILD_DIR = os.path.join(KENLM_DIR, "build")
 LMPLZ_EXEC = os.path.join(BUILD_DIR, "bin", "lmplz")
 BUILD_BINARY_EXEC = os.path.join(BUILD_DIR, "bin", "build_binary")
 
-CORPUS_PATH = os.path.join(CURRENT_DIR, "corpus.txt")
-ARPA_OUTPUT_PATH = os.path.join(CURRENT_DIR, "model.arpa")
-BINARY_OUTPUT_PATH = os.path.join(CURRENT_DIR, "model_ken_lm.bin")
+CORPUS_PATH = os.path.join(ROOT_DIR, "data", "processed", "corpus.txt")
+
+MODELS_DIR = os.path.join(ROOT_DIR, "models")
+ARPA_OUTPUT_PATH = os.path.join(MODELS_DIR, "model.arpa")
+BINARY_OUTPUT_PATH = os.path.join(MODELS_DIR, "model_ken_lm.bin")
 
 NGRAM_ORDER = 3
-
 
 def run_command(command, description=""):
     if description:
@@ -47,10 +48,10 @@ def run_command(command, description=""):
 
 
 def prepare_environment():
-    logger.info("Checking for KenLM binaries...")
+    logger.info("Checking for KenLM binaries at root...")
     
     if os.path.exists(LMPLZ_EXEC) and os.path.exists(BUILD_BINARY_EXEC):
-        logger.info("KenLM binaries found. Skipping compilation step.")
+        logger.info("KenLM binaries found. Skipping C++ compilation.")
         return
 
     logger.info("KenLM binaries missing. Starting environment setup and compilation...")
@@ -63,7 +64,7 @@ def prepare_environment():
     if not os.path.exists(KENLM_DIR):
         run_command(
             f"git clone https://github.com/kpu/kenlm.git {KENLM_DIR}",
-            description="Cloning KenLM repository from GitHub"
+            description="Cloning KenLM repository to root directory"
         )
     else:
         logger.info(f"KenLM directory already exists at {KENLM_DIR}. Skipping clone.")
@@ -81,13 +82,15 @@ def main():
     prepare_environment()
 
     if not os.path.exists(LMPLZ_EXEC) or not os.path.exists(BUILD_BINARY_EXEC):
-        logger.error("Failed to build KenLM binaries. Execution aborted.")
+        logger.error("Failed to verify KenLM binaries. Execution aborted.")
         sys.exit(1)
 
     if not os.path.exists(CORPUS_PATH):
         logger.error(f"Input corpus file not found at: {CORPUS_PATH}")
-        logger.warning("Please prepare 'corpus.txt' before starting the training.")
+        logger.warning("Please ensure 'corpus.txt' is placed inside 'data/processed/' before running.")
         sys.exit(1)
+
+    os.makedirs(MODELS_DIR, exist_ok=True)
 
     lmplz_cmd = f"{LMPLZ_EXEC} -o {NGRAM_ORDER} < {CORPUS_PATH} > {ARPA_OUTPUT_PATH}"
     run_command(
@@ -101,6 +104,10 @@ def main():
         description="Converting ARPA format to optimized Binary format (.bin)"
     )
     
+    if os.path.exists(ARPA_OUTPUT_PATH):
+        os.remove(ARPA_OUTPUT_PATH)
+        logger.info("Removed intermediate ARPA file to keep 'models/' directory clean.")
+
     logger.info("--- TRAINING PIPELINE COMPLETED SUCCESSFULLY ---")
 
 
