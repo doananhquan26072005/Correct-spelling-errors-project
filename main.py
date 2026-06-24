@@ -135,7 +135,7 @@ def main():
             cfg=spell_cfg, abbr_processor=abbr_engine, evaluator=evaluator, 
             model_lm=model_lm, generator=generator, extractor_engine=extractor_engine,
             ranker=ranker, word_to_idx=word_to_idx
-        ).correct_sentence()
+        ).correct_sentence(text, stopwords)
 
         # evaluator.evaluate_error_detection(validation_df=df1_valid, abbr_engine=abbr_engine)
         # evaluator.evaluate_ranking_performance(
