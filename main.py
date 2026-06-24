@@ -219,20 +219,20 @@ def main():
 
         logger.info("Running joint evaluation loop (Diacritic + Spell) on df_test...")
         
-        evaluator.evaluate_word_accuracy(
-            validation_df=df_test, 
-            abbr_engine=abbr_engine,
-            pipeline_correct_fn=joint_pipeline, 
-            stopwords=stopwords,
-            word_to_idx=word_to_idx
-        )
+        # evaluator.evaluate_word_accuracy(
+        #     validation_df=df_test, 
+        #     abbr_engine=abbr_engine,
+        #     pipeline_correct_fn=joint_pipeline, 
+        #     stopwords=stopwords,
+        #     word_to_idx=word_to_idx
+        # )
 
-        evaluator.evaluate_end_to_end(
-            validation_df=df_test,
-            abbr_engine=abbr_engine,
-            pipeline_correct_fn=joint_pipeline,
-            stopwords=stopwords
-        )
+        # evaluator.evaluate_end_to_end(
+        #     validation_df=df_test,
+        #     abbr_engine=abbr_engine,
+        #     pipeline_correct_fn=joint_pipeline,
+        #     stopwords=stopwords
+        # )
         visualizer = Visualizer(pipeline=joint_pipeline, abbr_engine=abbr_engine, evaluator=evaluator, word_to_idx=word_to_idx)
         exact_sentences, error_sentence, error_words = visualizer.analyze_predictions(
             validation_df=df_test, stopwords=stopwords, num_samples=10
