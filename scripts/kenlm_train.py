@@ -17,7 +17,8 @@ CORPUS_PATH = os.path.join(CURRENT_DIR, "corpus.txt")
 ARPA_OUTPUT_PATH = os.path.join(CURRENT_DIR, "model.arpa")
 BINARY_OUTPUT_PATH = os.path.join(CURRENT_DIR, "model_ken_lm.bin")
 
-NGRAM_ORDER = 3 
+NGRAM_ORDER = 3
+
 
 def run_command(command, description=""):
     if description:
@@ -45,14 +46,42 @@ def run_command(command, description=""):
         raise RuntimeError(error_msg)
 
 
+def prepare_environment():
+    logger.info("Checking for KenLM binaries...")
+    
+    if os.path.exists(LMPLZ_EXEC) and os.path.exists(BUILD_BINARY_EXEC):
+        logger.info("KenLM binaries found. Skipping compilation step.")
+        return
+
+    logger.info("KenLM binaries missing. Starting environment setup and compilation...")
+    
+    run_command(
+        "sudo apt-get update && sudo apt-get install build-essential cmake libboost-all-dev zlib1g-dev libbz2-dev liblzma-dev -y",
+        description="Installing build-essential, cmake, boost, and compression libraries"
+    )
+
+    if not os.path.exists(KENLM_DIR):
+        run_command(
+            f"git clone https://github.com/kpu/kenlm.git {KENLM_DIR}",
+            description="Cloning KenLM repository from GitHub"
+        )
+    else:
+        logger.info(f"KenLM directory already exists at {KENLM_DIR}. Skipping clone.")
+
+    os.makedirs(BUILD_DIR, exist_ok=True)
+    run_command(
+        f"cd {BUILD_DIR} && cmake .. && make -j4",
+        description="Configuring CMake and compiling KenLM source with 4 threads"
+    )
+
+
 def main():
     logger.info("--- STARTING N-GRAM TRAINING PIPELINE ---")
 
+    prepare_environment()
+
     if not os.path.exists(LMPLZ_EXEC) or not os.path.exists(BUILD_BINARY_EXEC):
-        logger.error(
-            f"KenLM binaries not found at {BUILD_DIR}/bin/. "
-            "Please ensure KenLM source is built before running."
-        )
+        logger.error("Failed to build KenLM binaries. Execution aborted.")
         sys.exit(1)
 
     if not os.path.exists(CORPUS_PATH):
